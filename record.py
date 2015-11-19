@@ -5,8 +5,8 @@ import sys
 
 
 RECORD_FN_NAME = '_record_state_fn_hidden_123'
-def _record_state_fn_hidden_123():
-    print "YOLO!"
+def _record_state_fn_hidden_123(lineno, f_locals):
+    print lineno, f_locals
 
 
 # http://stackoverflow.com/a/12240419
@@ -22,15 +22,14 @@ def record(f):
         return f
 
     parsed = ast.parse(inspect.getsource(f))
-    new_body = parsed.body[0].body
+    original_body = list(parsed.body[0].body)
+    new_body = []
 
-    # Create record_state call.
-    name = ast.Name(ctx=ast.Load(), id=RECORD_FN_NAME, lineno=0, col_offset=0)
-    call = ast.Call(func=name, lineno=0, col_offset=0, args=[], keywords=[])
-    expr = ast.Expr(value=call, lineno=0, col_offset=0)
+    for item in original_body:
+        new_body.append(item)
+        new_body.append(make_record_state_call_expr(item.lineno))
 
-    # Insert record_state call.
-    new_body = new_body[:1] + [expr] + new_body[1:]
+    # Update body
     parsed.body[0].body = new_body
 
     # Compile and inject modified function back into its env.
@@ -43,4 +42,22 @@ def record(f):
     _blocked = False
 
     return env[f.__name__]
+
+
+def make_record_state_call_expr(lineno):
+    # Create locals() call.
+    name = ast.Name(ctx=ast.Load(), id='locals', lineno=0, col_offset=0)
+    locals_call = ast.Call(func=name, lineno=0, col_offset=0, args=[], keywords=[])
+
+    # Create lineno constant arg.
+    num = ast.Num(n=lineno, lineno=0, col_offset=0)
+
+    # Create record_state call.
+    name = ast.Name(ctx=ast.Load(), id=RECORD_FN_NAME, lineno=0, col_offset=0)
+    call = ast.Call(func=name, lineno=0, col_offset=0,
+                    args=[num, locals_call],
+                    keywords=[])
+    expr = ast.Expr(value=call, lineno=0, col_offset=0)
+
+    return expr
 
