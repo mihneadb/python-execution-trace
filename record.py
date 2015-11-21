@@ -24,14 +24,9 @@ def record(f):
 
     parsed = ast.parse(strip_indent(inspect.getsource(f)))
     original_body = list(parsed.body[0].body)
-    new_body = []
-
-    for item in original_body:
-        new_body.append(item)
-        new_body.append(make_record_state_call_expr(item.lineno))
 
     # Update body
-    parsed.body[0].body = new_body
+    parsed.body[0].body = _fill_body_with_record(original_body)
 
     # Compile and inject modified function back into its env.
     new_f_compiled = compile(parsed, '<string>', 'exec')
@@ -89,3 +84,25 @@ def strip_indent(source):
             line = ''
         stripped_lines.append(line)
     return '\n'.join(stripped_lines)
+
+
+def _fill_body_with_record(original_body):
+    """Adds a record_state call after every item in the block.
+
+    Recursive, works for nested bodies (e.g. if statements).
+    """
+    new_body = []
+
+    for item in original_body:
+        # Look out for nested bodies.
+        if hasattr(item, 'body'):
+            new_nested_body = _fill_body_with_record(item.body)
+            item.body = new_nested_body
+        if hasattr(item, 'orelse'):
+            new_nested_body = _fill_body_with_record(item.orelse)
+            item.orelse = new_nested_body
+
+        new_body.append(item)
+        new_body.append(make_record_state_call_expr(item.lineno))
+
+    return new_body

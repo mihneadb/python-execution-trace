@@ -23,6 +23,38 @@ class TestRecord(unittest.TestCase):
 
         self.assertEqual(record_mock.call_count, 2, "Missed some call sites.")
 
+    def test_conditional(self):
+        """Simple fn with a simple conditional."""
+
+        @record
+        def foo():
+            x = 3
+            y = 2
+            if x == 3:
+                y = 5
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+
+        self.assertEqual(record_mock.call_count, 4, "Missed some call sites.")
+
+    def test_conditional_else(self):
+        """Simple fn with a simple conditional."""
+
+        @record
+        def foo():
+            x = 3
+            y = 2
+            if x != 3:
+                y = 5
+            else:
+                y = 6
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+
+        self.assertEqual(record_mock.call_count, 4, "Missed some call sites.")
+
     def test_find_indent_level(self):
         source = '    def foo()'
         self.assertEqual(find_indent_level(source), 4)
