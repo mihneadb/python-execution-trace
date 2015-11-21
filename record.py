@@ -22,7 +22,7 @@ def record(f):
     if _blocked:
         return f
 
-    parsed = ast.parse(inspect.getsource(f))
+    parsed = ast.parse(strip_indent(inspect.getsource(f)))
     original_body = list(parsed.body[0].body)
     new_body = []
 

@@ -5,9 +5,11 @@ from record import record, RECORD_FN_NAME, find_indent_level, strip_indent
 
 
 class TestRecord(unittest.TestCase):
-    record_state_fn_path = 'record.%s' % RECORD_FN_NAME
 
-    @unittest.skip
+    # Patch path refers to current module because the decorator injects the
+    # record fn in here.
+    record_state_fn_path = 'test_record.%s' % RECORD_FN_NAME
+
     def test_simple(self):
         """Simple function, no loop, no return, no conditional."""
 
