@@ -4,7 +4,8 @@ from record import record
 @record
 def foo(x, y):
     a = x + y
-    print a
+    b = x + 2
+    c = y + 2
 
 
 if __name__ == '__main__':
