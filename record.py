@@ -86,23 +86,32 @@ def strip_indent(source):
     return '\n'.join(stripped_lines)
 
 
-def _fill_body_with_record(original_body):
+def _fill_body_with_record(original_body, prepend=False):
     """Adds a record_state call after every item in the block.
 
     Recursive, works for nested bodies (e.g. if statements).
+
+    `prepend` inserts a record_state call right at the start.
     """
     new_body = []
+    if prepend and original_body:
+        new_body.append(make_record_state_call_expr(original_body[0].lineno))
 
     for item in original_body:
+        has_nested = False
         # Look out for nested bodies.
         if hasattr(item, 'body'):
-            new_nested_body = _fill_body_with_record(item.body)
+            has_nested = True
+            new_nested_body = _fill_body_with_record(item.body, prepend=True)
             item.body = new_nested_body
         if hasattr(item, 'orelse'):
-            new_nested_body = _fill_body_with_record(item.orelse)
+            has_nested = True
+            new_nested_body = _fill_body_with_record(item.orelse, prepend=True)
             item.orelse = new_nested_body
 
         new_body.append(item)
-        new_body.append(make_record_state_call_expr(item.lineno))
+        # Don't append a call after the end of the nested body, it's redundant.
+        if not has_nested:
+            new_body.append(make_record_state_call_expr(item.lineno))
 
     return new_body
