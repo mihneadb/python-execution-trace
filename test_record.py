@@ -69,7 +69,22 @@ class TestRecord(unittest.TestCase):
         with mock.patch(self.record_state_fn_path) as record_mock:
             foo()
 
-        self.assertEqual(record_mock.call_count, 8)
+        self.assertEqual(record_mock.call_count, 9)
+
+    def test_for(self):
+        """Fn with a for."""
+
+        @record
+        def foo():
+            x = 3
+            s = 0
+            for i in range(x):
+                s = s + i
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+
+        self.assertEqual(record_mock.call_count, 9)
 
     def test_find_indent_level(self):
         source = '    def foo()'
