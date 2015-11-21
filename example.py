@@ -4,10 +4,11 @@ from record import record
 @record
 def foo(x, y):
     a = x + y
-    b = x + 2
-    c = y + 2
+    for i in range(a):
+        x = x + 1
+    c = x
 
 
 if __name__ == '__main__':
-    foo(3, 5)
+    foo(2, 3)
 
