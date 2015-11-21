@@ -87,6 +87,22 @@ class TestRecord(unittest.TestCase):
 
         self._check_record_calls(record_mock, [3, 4, 5, 6, 5, 6, 5, 6, 5])
 
+    def test_nested_if_in_for(self):
+        """Fn with a for containing an if."""
+
+        @record
+        def foo():
+            x = 3
+            s = 0
+            for i in range(x):
+                if s > -1:
+                    s += i
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+
+        self._check_record_calls(record_mock, [3, 4, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5])
+
     def test_find_indent_level(self):
         source = '    def foo()'
         self.assertEqual(find_indent_level(source), 4)
