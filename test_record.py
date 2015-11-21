@@ -55,6 +55,22 @@ class TestRecord(unittest.TestCase):
 
         self.assertEqual(record_mock.call_count, 4)
 
+    def test_while(self):
+        """Fn with a while."""
+
+        @record
+        def foo():
+            x = 3
+            y = 6
+
+            while x < y:
+                x += 1
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+
+        self.assertEqual(record_mock.call_count, 8)
+
     def test_find_indent_level(self):
         source = '    def foo()'
         self.assertEqual(find_indent_level(source), 4)
