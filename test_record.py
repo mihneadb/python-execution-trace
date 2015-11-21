@@ -21,7 +21,7 @@ class TestRecord(unittest.TestCase):
         with mock.patch(self.record_state_fn_path) as record_mock:
             foo()
 
-        self.assertEqual(record_mock.call_count, 2)
+        self._check_record_calls(record_mock, [3, 4])
 
     def test_conditional(self):
         """Fn with a simple conditional."""
@@ -36,7 +36,7 @@ class TestRecord(unittest.TestCase):
         with mock.patch(self.record_state_fn_path) as record_mock:
             foo()
 
-        self.assertEqual(record_mock.call_count, 4)
+        self._check_record_calls(record_mock, [3, 4, 5, 6])
 
     def test_conditional_else(self):
         """Fn with conditional having else."""
@@ -53,7 +53,8 @@ class TestRecord(unittest.TestCase):
         with mock.patch(self.record_state_fn_path) as record_mock:
             foo()
 
-        self.assertEqual(record_mock.call_count, 4)
+        # Note: `else` does not have a lineno, using `if`'s lineno.
+        self._check_record_calls(record_mock, [3, 4, 5, 8])
 
     def test_while(self):
         """Fn with a while."""
@@ -69,7 +70,7 @@ class TestRecord(unittest.TestCase):
         with mock.patch(self.record_state_fn_path) as record_mock:
             foo()
 
-        self.assertEqual(record_mock.call_count, 9)
+        self._check_record_calls(record_mock, [3, 4, 6, 7, 6, 7, 6, 7, 6])
 
     def test_for(self):
         """Fn with a for."""

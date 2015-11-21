@@ -107,6 +107,7 @@ def _fill_body_with_record(original_body, prepend=False, lineno=None):
             item.body = new_nested_body
         if hasattr(item, 'orelse'):
             has_nested = True
+            # `else` does not have a lineno, using `if`'s lineno.
             new_nested_body = _fill_body_with_record(item.orelse, prepend=True, lineno=item.lineno)
             item.orelse = new_nested_body
 
