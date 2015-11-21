@@ -84,7 +84,7 @@ class TestRecord(unittest.TestCase):
         with mock.patch(self.record_state_fn_path) as record_mock:
             foo()
 
-        self.assertEqual(record_mock.call_count, 9)
+        self._check_record_calls(record_mock, [3, 4, 5, 6, 5, 6, 5, 6, 5])
 
     def test_find_indent_level(self):
         source = '    def foo()'
@@ -123,3 +123,8 @@ def foo():
 
         self.assertEqual(strip_indent(indented_source), stripped_source,
                          "Incorrectly stripped indentation.")
+
+    def _check_record_calls(self, record_mock, expected_linenos):
+        self.assertEqual(record_mock.call_count, len(expected_linenos))
+        for i, lineno in enumerate(expected_linenos):
+            self.assertEqual(record_mock.call_args_list[i][0][0], lineno)
