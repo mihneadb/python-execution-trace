@@ -7,7 +7,7 @@ def foo(x, y):
     a = x + y
     for i in range(a):
         x = x + 1
-    c = x
+    return x
 
 
 if __name__ == '__main__':

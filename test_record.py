@@ -103,6 +103,19 @@ class TestRecord(unittest.TestCase):
 
         self._check_record_calls(record_mock, [3, 4, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5])
 
+    def test_return_wrapping(self):
+        """Fn with return has return value captured."""
+
+        @record
+        def foo():
+            x = 3
+            return x
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+
+        self._check_record_calls(record_mock, [3, 4])
+
     def test_find_indent_level(self):
         source = '    def foo()'
         self.assertEqual(find_indent_level(source), 4)

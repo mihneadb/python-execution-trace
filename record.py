@@ -1,4 +1,3 @@
-from functools import wraps
 import ast
 import inspect
 import string
@@ -6,6 +5,9 @@ import sys
 
 
 RECORD_FN_NAME = '_record_state_fn_hidden_123'
+RETVAL_NAME = '_retval_hidden_123'
+
+
 def _record_state_fn_hidden_123(lineno, f_locals):
     print lineno, f_locals
 
@@ -40,7 +42,7 @@ def record(f):
     return env[f.__name__]
 
 
-def make_record_state_call_expr(lineno):
+def _make_record_state_call_expr(lineno):
     # Create locals() call.
     name = ast.Name(ctx=ast.Load(), id='locals', lineno=0, col_offset=0)
     locals_call = ast.Call(func=name, lineno=0, col_offset=0, args=[], keywords=[])
@@ -56,6 +58,21 @@ def make_record_state_call_expr(lineno):
     expr = ast.Expr(value=call, lineno=0, col_offset=0)
 
     return expr
+
+
+def _make_return_trace_call_exprs(item):
+    # Store retval in an aux var and return that instead.
+    store_name = ast.Name(ctx=ast.Store(), id=RETVAL_NAME, col_offset=0, lineno=0)
+    load_name = ast.Name(ctx=ast.Load(), id=RETVAL_NAME, col_offset=0, lineno=0)
+
+    assign = ast.Assign(col_offset=0, targets=[store_name], value=item.value, lineno=0)
+    ret = ast.Return(lineno=0, value=load_name, col_offset=0)
+
+    return [
+        assign,
+        _make_record_state_call_expr(item.lineno),
+        ret
+    ]
 
 
 def find_indent_level(source):
@@ -96,9 +113,15 @@ def _fill_body_with_record(original_body, prepend=False, lineno=None):
     new_body = []
     if prepend:
         assert lineno is not None, "Should've called prepend with a lineno."
-        new_body.append(make_record_state_call_expr(lineno))
+        new_body.append(_make_record_state_call_expr(lineno))
 
     for item in original_body:
+
+        # Handle return statements separately such that we capture retval as well.
+        if isinstance(item, ast.Return):
+            new_body.extend(_make_return_trace_call_exprs(item))
+            continue
+
         has_nested = False
         # Look out for nested bodies.
         if hasattr(item, 'body'):
@@ -114,6 +137,6 @@ def _fill_body_with_record(original_body, prepend=False, lineno=None):
         new_body.append(item)
         # Don't append a call after the end of the nested body, it's redundant.
         if not has_nested:
-            new_body.append(make_record_state_call_expr(item.lineno))
+            new_body.append(_make_record_state_call_expr(item.lineno))
 
     return new_body
