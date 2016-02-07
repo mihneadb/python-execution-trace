@@ -143,7 +143,8 @@ def _fill_body_with_record(original_body, prepend=False, lineno=None):
 
     Recursive, works for nested bodies (e.g. if statements).
 
-    `prepend` inserts a record_state call right at the start.
+    `prepend` inserts a record_state call right at the start. We need this for
+    recording the state on lines introducing nested blocks (`if`, `while` etc.)
     """
     new_body = []
     if prepend:
