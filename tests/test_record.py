@@ -101,6 +101,24 @@ class TestRecord(unittest.TestCase):
         self._check_record_calls(record_mock, [3, 4, 5, 6, 5, 6, 5, 6, 5])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
 
+    def test_for_else(self):
+        """Fn with a for+else."""
+
+        @record
+        def foo():
+            x = 3
+            s = 0
+            for i in range(x):
+                s = s + i
+            else:
+                ok = 1
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+
+        self._check_record_calls(record_mock, [3, 4, 5, 6, 5, 6, 5, 6, 5, 8])
+        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+
     def test_nested_if_in_for(self):
         """Fn with a for containing an if."""
 
