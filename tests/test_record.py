@@ -152,6 +152,80 @@ class TestRecord(unittest.TestCase):
         self._check_record_calls(record_mock, [3, 3, 3, 4, 5, 5])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
 
+    def test_try_ok(self):
+        """Fn with a try that does not raise."""
+
+        @record
+        def foo():
+            x = 3
+            try:
+                x = x + 1
+            except:
+                y = 2
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+
+        self._check_record_calls(record_mock, [3, 4, 5])
+        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+
+    def test_try_except(self):
+        """Fn with a try that raises."""
+
+        @record
+        def foo():
+            x = 3
+            try:
+                x = 1 / 0
+            except:
+                y = 2
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+
+        # `1 / 0` raises so the state is not recorded there. Jumps straight ahead to `y = 2`.
+        self._check_record_calls(record_mock, [3, 4, 7])
+        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+
+    def test_try_multi_except(self):
+        """Fn with a try that raises and has multiple except branches."""
+
+        @record
+        def foo():
+            x = 3
+            try:
+                x = 1 / 0
+            except KeyboardInterrupt:
+                y = 2
+            except ZeroDivisionError:
+                y = 3
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+
+        # `1 / 0` raises so the state is not recorded there. Jumps straight ahead to `y = 3`.
+        self._check_record_calls(record_mock, [3, 4, 9])
+        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+
+    def test_try_ok_else(self):
+        """Fn with a try that does not raise and does something in `else`."""
+
+        @record
+        def foo():
+            x = 3
+            try:
+                x = x + 1
+            except:
+                y = 2
+            else:
+                z = 4
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+
+        self._check_record_calls(record_mock, [3, 4, 5, 9])
+        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+
     def test_return_wrapping(self):
         """Fn with return has return value captured."""
 
@@ -175,5 +249,5 @@ class TestRecord(unittest.TestCase):
                                  "Record was called with the wrong lineno.")
         except:
             # Helper for debugging.
-            print "Actual calls", [record_mock.call_args_list[i][0][0] for i in range(len(expected_linenos))]
+            print "Actual calls", [record_mock.call_args_list[i][0][0] for i in range(record_mock.call_count)]
             raise

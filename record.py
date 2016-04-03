@@ -122,16 +122,32 @@ def _fill_body_with_record(original_body, prepend=False, lineno=None):
             continue
 
         has_nested = False
+
         # Look out for nested bodies.
         if hasattr(item, 'body'):
             has_nested = True
             new_nested_body = _fill_body_with_record(item.body, prepend=True, lineno=item.lineno)
             item.body = new_nested_body
+
         if hasattr(item, 'orelse'):
             has_nested = True
+
+            # Don't want to prepend call for try/except, but we want for the others.
+            if isinstance(item, ast.TryExcept):
+                prepend = False
+            else:
+                prepend = True
+
             # `else` does not have a lineno, using `if`'s lineno.
-            new_nested_body = _fill_body_with_record(item.orelse, prepend=True, lineno=item.lineno)
+            new_nested_body = _fill_body_with_record(item.orelse, prepend=prepend, lineno=item.lineno)
             item.orelse = new_nested_body
+
+        # Except blocks.
+        if hasattr(item, 'handlers'):
+            has_nested = True
+            for handler in item.handlers:
+                new_nested_body = _fill_body_with_record(handler.body, prepend=False, lineno=handler.lineno)
+                handler.body = new_nested_body
 
         new_body.append(item)
         # Don't append a call after the end of the nested body, it's redundant.
