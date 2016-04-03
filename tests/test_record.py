@@ -2,7 +2,6 @@ import unittest
 import mock
 
 from record import record, RECORD_FN_NAME
-from utils import find_indent_level, strip_indent
 
 
 class TestRecord(unittest.TestCase):
