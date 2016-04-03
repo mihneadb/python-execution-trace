@@ -118,6 +118,22 @@ class TestRecord(unittest.TestCase):
         self._check_record_calls(record_mock, [3, 4, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
 
+    def test_recursive_function(self):
+        """Fn with a recursive call."""
+
+        @record
+        def foo(x):
+            if x == 0:
+                return 1
+            return 1 + foo(x - 1)
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo(2)
+
+        # Recursive calls are expanded/eval'd first, that's why 3, 3, 3.
+        self._check_record_calls(record_mock, [3, 3, 3, 4, 5, 5])
+        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+
     def test_return_wrapping(self):
         """Fn with return has return value captured."""
 
@@ -133,6 +149,8 @@ class TestRecord(unittest.TestCase):
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
 
     def _check_record_calls(self, record_mock, expected_linenos):
-        self.assertEqual(record_mock.call_count, len(expected_linenos))
+        self.assertEqual(record_mock.call_count, len(expected_linenos),
+                         "Wrong number of calls to record.")
         for i, lineno in enumerate(expected_linenos):
-            self.assertEqual(record_mock.call_args_list[i][0][0], lineno)
+            self.assertEqual(record_mock.call_args_list[i][0][0], lineno,
+                             "Record was called with the wrong lineno.")
