@@ -167,8 +167,13 @@ class TestRecord(unittest.TestCase):
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
 
     def _check_record_calls(self, record_mock, expected_linenos):
-        self.assertEqual(record_mock.call_count, len(expected_linenos),
-                         "Wrong number of calls to record.")
-        for i, lineno in enumerate(expected_linenos):
-            self.assertEqual(record_mock.call_args_list[i][0][0], lineno,
-                             "Record was called with the wrong lineno.")
+        try:
+            self.assertEqual(record_mock.call_count, len(expected_linenos),
+                             "Wrong number of calls to record.")
+            for i, lineno in enumerate(expected_linenos):
+                self.assertEqual(record_mock.call_args_list[i][0][0], lineno,
+                                 "Record was called with the wrong lineno.")
+        except:
+            # Helper for debugging.
+            print "Actual calls", [record_mock.call_args_list[i][0][0] for i in range(len(expected_linenos))]
+            raise
