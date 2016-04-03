@@ -1,5 +1,6 @@
 import ast
 import copy
+from functools import wraps
 import inspect
 import json
 import os
@@ -8,24 +9,19 @@ import sys
 import tempfile
 
 
+
 RECORD_FN_NAME = '_record_state_fn_hidden_123'
 DUMP_FN_NAME = '_dump_state_fn_hidden_123'
 RETVAL_NAME = '_retval_hidden_123'
 RECORD_STORE_NAME = '_record_store_hidden_123'
 
+# Will be initialized in `record`.
 _record_store_hidden_123 = None
 
 
 def _record_state_fn_hidden_123(lineno, f_locals):
+    """Stores local line data."""
     _record_store_hidden_123['data'].append((lineno, copy.deepcopy(f_locals)))
-
-
-def _dump_state_fn_hidden_123():
-    fd, path = tempfile.mkstemp(prefix='record_', suffix='.json')
-    handle = os.fdopen(fd, 'w')
-    json.dump(_record_store_hidden_123, handle)
-    handle.close()
-    print "Recorded execution in", path
 
 
 # http://stackoverflow.com/a/12240419
@@ -51,7 +47,6 @@ def record(f):
     env = sys.modules[f.__module__].__dict__
     # We also need to inject our stuff in there.
     env[RECORD_FN_NAME] = globals()[RECORD_FN_NAME]
-    env[DUMP_FN_NAME] = globals()[DUMP_FN_NAME]
 
     _blocked = True
     exec(new_f_compiled, env)
@@ -63,7 +58,14 @@ def record(f):
         'data': []
     }
 
-    return env[f.__name__]
+    # Wrap in our own function such that we can dump the recorded state at the end.
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        ret = env[f.__name__](*args, **kwargs)
+        dump_recorded_state()
+        return ret
+
+    return wrapped
 
 
 def _make_record_state_call_expr(lineno):
@@ -95,19 +97,8 @@ def _make_return_trace_call_exprs(item):
     return [
         assign,
         _make_record_state_call_expr(item.lineno),
-        # Also call dump state so we output what we recorded.
-        _make_dump_state_call_expr(),
         ret
     ]
-
-
-def _make_dump_state_call_expr():
-    name = ast.Name(ctx=ast.Load(), id=DUMP_FN_NAME, lineno=0, col_offset=0)
-    call = ast.Call(func=name, lineno=0, col_offset=0,
-                    args=[],
-                    keywords=[])
-    expr = ast.Expr(value=call, lineno=0, col_offset=0)
-    return expr
 
 
 def find_indent_level(source):
@@ -176,3 +167,11 @@ def _fill_body_with_record(original_body, prepend=False, lineno=None):
             new_body.append(_make_record_state_call_expr(item.lineno))
 
     return new_body
+
+
+def dump_recorded_state():
+    fd, path = tempfile.mkstemp(prefix='record_', suffix='.json')
+    handle = os.fdopen(fd, 'w')
+    json.dump(_record_store_hidden_123, handle)
+    handle.close()
+    print "Recorded execution in", path
