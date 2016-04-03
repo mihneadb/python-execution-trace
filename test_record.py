@@ -9,6 +9,15 @@ class TestRecord(unittest.TestCase):
     # Patch path refers to current module because the decorator injects the
     # record fn in here.
     record_state_fn_path = 'test_record.%s' % RECORD_FN_NAME
+    dump_state_fn_path = 'record.dump_recorded_state'
+
+    def setUp(self):
+        self.dump_patcher = mock.patch(self.dump_state_fn_path)
+        self.dump_mock = self.dump_patcher.start()
+
+    def tearDown(self):
+        if self.dump_patcher:
+            self.dump_patcher.stop()
 
     def test_simple(self):
         """Simple function, no loop, no return, no conditional."""
@@ -22,6 +31,7 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4])
+        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
 
     def test_conditional(self):
         """Fn with a simple conditional."""
@@ -37,6 +47,7 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4, 5, 6])
+        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
 
     def test_conditional_else(self):
         """Fn with conditional having else."""
@@ -55,6 +66,7 @@ class TestRecord(unittest.TestCase):
 
         # Note: `else` does not have a lineno, using `if`'s lineno.
         self._check_record_calls(record_mock, [3, 4, 5, 8])
+        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
 
     def test_while(self):
         """Fn with a while."""
@@ -71,6 +83,7 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4, 6, 7, 6, 7, 6, 7, 6])
+        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
 
     def test_for(self):
         """Fn with a for."""
@@ -86,6 +99,7 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4, 5, 6, 5, 6, 5, 6, 5])
+        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
 
     def test_nested_if_in_for(self):
         """Fn with a for containing an if."""
@@ -102,6 +116,7 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5])
+        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
 
     def test_return_wrapping(self):
         """Fn with return has return value captured."""
@@ -115,6 +130,7 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4])
+        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
 
     def test_find_indent_level(self):
         source = '    def foo()'
