@@ -49,6 +49,25 @@ class TestRecord(unittest.TestCase):
         self._check_record_calls(record_mock, [3, 4, 5, 6])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
 
+    def test_elif(self):
+        """Fn with a simple conditional."""
+
+        @record
+        def foo():
+            x = 3
+            if x == 1:
+                y = 5
+            elif x == 2:
+                y = 6
+            elif x == 3:
+                y = 7
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+
+        self._check_record_calls(record_mock, [3, 4, 6, 8, 9])
+        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+
     def test_conditional_else(self):
         """Fn with conditional having else."""
 
