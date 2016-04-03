@@ -1,7 +1,8 @@
 import unittest
 import mock
 
-from record import record, RECORD_FN_NAME, find_indent_level, strip_indent
+from record import record, RECORD_FN_NAME
+from utils import find_indent_level, strip_indent
 
 
 class TestRecord(unittest.TestCase):
@@ -131,44 +132,6 @@ class TestRecord(unittest.TestCase):
 
         self._check_record_calls(record_mock, [3, 4])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
-
-    def test_find_indent_level(self):
-        source = '    def foo()'
-        self.assertEqual(find_indent_level(source), 4)
-
-        source = '    '
-        self.assertEqual(find_indent_level(source), 4)
-
-        source = ''
-        self.assertEqual(find_indent_level(source), 0)
-
-    @mock.patch('record.find_indent_level')
-    def test_strip_indent(self, find_indent_mock):
-        find_indent_mock.return_value = 4
-
-        indented_source = """
-    def foo():
-        x = 3
-
-        y = 4
-        # Comment here
-        if x == 3:
-            y = 5
-        return x + y
-"""
-        stripped_source = """
-def foo():
-    x = 3
-
-    y = 4
-    # Comment here
-    if x == 3:
-        y = 5
-    return x + y
-"""
-
-        self.assertEqual(strip_indent(indented_source), stripped_source,
-                         "Incorrectly stripped indentation.")
 
     def _check_record_calls(self, record_mock, expected_linenos):
         self.assertEqual(record_mock.call_count, len(expected_linenos))
