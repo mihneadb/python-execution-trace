@@ -3,11 +3,18 @@ import copy
 from functools import wraps
 import inspect
 import json
+import logging
 import os
 import sys
 import tempfile
 
 from utils import strip_indent
+
+
+# Init logging.
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 RECORD_FN_NAME = '_record_state_fn_hidden_123'
@@ -44,8 +51,8 @@ def record(f):
         raise ValueError('Cannot `record` more than one function at a time.')
     num_fns_recorded += 1
 
-
-    parsed = ast.parse(strip_indent(inspect.getsource(f)))
+    source = inspect.getsource(f)
+    parsed = ast.parse(strip_indent(source))
     original_body = list(parsed.body[0].body)
 
     # Update body
@@ -67,11 +74,22 @@ def record(f):
         'data': []
     }
 
+    first_dump_call = True
+    fd, path = tempfile.mkstemp(prefix='record_', suffix='.json')
+    # Will never be `close`d because we don't know when user stops the program.
+    # We'll live with this.
+    file = os.fdopen(fd, 'w')
+    logger.info("Will record execution of %s in %s", f.__name__, path)
+
     # Wrap in our own function such that we can dump the recorded state at the end.
     @wraps(f)
     def wrapped(*args, **kwargs):
         ret = env[f.__name__](*args, **kwargs)
-        dump_recorded_state()
+
+        if first_dump_call:
+            dump_fn_source(file, source)
+        dump_recorded_state(file)
+
         return ret
 
     return wrapped
@@ -166,9 +184,12 @@ def _fill_body_with_record(original_body, prepend=False, lineno=None):
     return new_body
 
 
-def dump_recorded_state():
-    fd, path = tempfile.mkstemp(prefix='record_', suffix='.json')
-    handle = os.fdopen(fd, 'w')
-    json.dump(_record_store_hidden_123, handle)
-    handle.close()
-    print "Recorded execution in", path
+def dump_recorded_state(file):
+    json.dump(_record_store_hidden_123, file)
+    file.write('\n')
+
+
+def dump_fn_source(file, source):
+    data = {'source': source}
+    json.dump(data, file)
+    file.write('\n')
