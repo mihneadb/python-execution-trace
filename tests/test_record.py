@@ -8,7 +8,7 @@ class TestRecord(unittest.TestCase):
 
     # Patch path refers to current module because the decorator injects the
     # record fn in here.
-    record_state_fn_path = 'tests.test_record.%s' % record.RECORD_FN_NAME
+    record_state_fn_path = '%s.%s' % (__name__, record.RECORD_FN_NAME)
     dump_state_fn_path = 'trace.record.dump_recorded_state'
 
     def setUp(self):
