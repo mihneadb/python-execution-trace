@@ -3,15 +3,15 @@ import mock
 import StringIO
 import unittest
 
-import trace.constants
 from trace import record
+from trace.constants import SOURCE_DUMP_SCHEMA, EXECUTION_DUMP_SCHEMA, RECORD_FN_NAME
 
 
 class TestRecord(unittest.TestCase):
 
     # Patch path refers to current module because the decorator injects the
     # record fn in here.
-    record_state_fn_path = '%s.%s' % (__name__, trace.constants.RECORD_FN_NAME)
+    record_state_fn_path = '%s.%s' % (__name__, RECORD_FN_NAME)
     dump_state_fn_path = 'trace.record.dump_recorded_state'
 
     def setUp(self):
@@ -317,12 +317,12 @@ class TestRecord(unittest.TestCase):
 
         # First line should be source.
         data = json.loads(lines[0])
-        self.assertIn('source', data, "First line does not have source.")
+        SOURCE_DUMP_SCHEMA(data)
 
         # Next lines should be execution dumps.
         for line in lines[1:]:
             data = json.loads(line)
-            self.assertIn('data', data, "Execution line does not have `data` key.")
+            EXECUTION_DUMP_SCHEMA(data)
 
     def _reset_record(self):
         """Resets `record` state as if a new program was run."""
