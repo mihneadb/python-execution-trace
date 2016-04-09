@@ -280,6 +280,20 @@ class TestRecord(unittest.TestCase):
         with self.assertRaises(ValueError):
             record.record(foo2)
 
+    def test_multiple_executions_are_recorded(self):
+        """Multiple executions end up as multiple lines in the file."""
+
+        @record.record
+        def foo():
+            pass
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+            foo()
+            foo()
+
+        self._check_dump_file_structure(self.dump_file, 3)
+
     def _check_record_calls(self, record_mock, expected_linenos):
         try:
             self.assertEqual(record_mock.call_count, len(expected_linenos),
