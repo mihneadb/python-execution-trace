@@ -14,6 +14,16 @@ class TestRecord(unittest.TestCase):
     record_state_fn_path = '%s.%s' % (__name__, RECORD_FN_NAME)
     dump_state_fn_path = 'trace.record.dump_recorded_state'
 
+    @classmethod
+    def setUpClass(cls):
+        cls.log_patcher = mock.patch('trace.record.logger')
+        cls.log_patcher.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        if cls.log_patcher:
+            cls.log_patcher.stop()
+
     def setUp(self):
         self._reset_record()
 
