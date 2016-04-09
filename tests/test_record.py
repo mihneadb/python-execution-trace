@@ -14,6 +14,7 @@ class TestRecord(unittest.TestCase):
     def setUp(self):
         self.dump_patcher = mock.patch(self.dump_state_fn_path)
         self.dump_mock = self.dump_patcher.start()
+        self._reset_record()
 
     def tearDown(self):
         if self.dump_patcher:
@@ -259,6 +260,19 @@ class TestRecord(unittest.TestCase):
         self._check_record_calls(record_mock, [3, 4])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
 
+    def test_can_only_record_one_fn(self):
+        """Decorator should not allow multi-function use."""
+
+        @record.record
+        def foo():
+            return 3
+
+        def foo2():
+            return 4
+
+        with self.assertRaises(ValueError):
+            record.record(foo2)
+
     def _check_record_calls(self, record_mock, expected_linenos):
         try:
             self.assertEqual(record_mock.call_count, len(expected_linenos),
@@ -270,3 +284,8 @@ class TestRecord(unittest.TestCase):
             # Helper for debugging.
             print "Actual calls", [record_mock.call_args_list[i][0][0] for i in range(record_mock.call_count)]
             raise
+
+    def _reset_record(self):
+        """Resets `record` state as if a new program was run."""
+        record.num_fns_recorded = 0
+        record._record_store_hidden_123 = None

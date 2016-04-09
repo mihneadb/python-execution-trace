@@ -17,6 +17,8 @@ RECORD_STORE_NAME = '_record_store_hidden_123'
 
 # Will be initialized in `record`.
 _record_store_hidden_123 = None
+# To guard against decorating more than one function.
+num_fns_recorded = 0
 
 
 def _record_state_fn_hidden_123(lineno, f_locals):
@@ -30,11 +32,18 @@ def _record_state_fn_hidden_123(lineno, f_locals):
 _blocked = False
 def record(f):
     """Transforms `f` such that after every line record_state is called."""
+    global num_fns_recorded
 
     # Make sure this is not a recursive decorator application.
     global _blocked
     if _blocked:
         return f
+
+    # We only support recording one fn's executions at the moment.
+    if num_fns_recorded:
+        raise ValueError('Cannot `record` more than one function at a time.')
+    num_fns_recorded += 1
+
 
     parsed = ast.parse(strip_indent(inspect.getsource(f)))
     original_body = list(parsed.body[0].body)
