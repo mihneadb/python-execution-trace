@@ -20,6 +20,8 @@ logger.setLevel(logging.INFO)
 _record_store_hidden_123 = None
 # To guard against decorating more than one function.
 num_fns_recorded = 0
+# To know when to print out the source code of the function.
+first_dump_call = True
 
 
 def _record_state_fn_hidden_123(lineno, f_locals):
@@ -72,7 +74,6 @@ def record(f):
         'data': []
     }
 
-    first_dump_call = True
     file, path = _get_dump_file()
     logger.info("Will record execution of %s in %s", f.__name__, path)
 
@@ -81,8 +82,10 @@ def record(f):
     def wrapped(*args, **kwargs):
         ret = env[f.__name__](*args, **kwargs)
 
+        global first_dump_call
         if first_dump_call:
             dump_fn_source(file, source)
+            first_dump_call = False
         dump_recorded_state(file)
 
         return ret

@@ -15,8 +15,6 @@ class TestRecord(unittest.TestCase):
     dump_state_fn_path = 'trace.record.dump_recorded_state'
 
     def setUp(self):
-        self.dump_patcher = mock.patch(self.dump_state_fn_path)
-        self.dump_mock = self.dump_patcher.start()
         self._reset_record()
 
         self.get_dump_file_patcher = mock.patch('trace.record._get_dump_file')
@@ -25,8 +23,6 @@ class TestRecord(unittest.TestCase):
         self.get_dump_file.return_value = self.dump_file, '/tmp/mock_path'
 
     def tearDown(self):
-        if self.dump_patcher:
-            self.dump_patcher.stop()
         if self.get_dump_file_patcher:
             self.get_dump_file_patcher.stop()
         self.dump_file = None
@@ -43,7 +39,6 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4])
-        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
         self._check_dump_file_structure(self.dump_file)
 
     def test_conditional(self):
@@ -60,7 +55,6 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4, 5, 6])
-        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
         self._check_dump_file_structure(self.dump_file)
 
     def test_elif(self):
@@ -80,7 +74,6 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4, 6, 8, 9])
-        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
         self._check_dump_file_structure(self.dump_file)
 
     def test_conditional_else(self):
@@ -100,7 +93,6 @@ class TestRecord(unittest.TestCase):
 
         # Note: `else` does not have a lineno, using `if`'s lineno.
         self._check_record_calls(record_mock, [3, 4, 5, 8])
-        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
         self._check_dump_file_structure(self.dump_file)
 
     def test_while(self):
@@ -118,7 +110,6 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4, 6, 7, 6, 7, 6, 7, 6])
-        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
         self._check_dump_file_structure(self.dump_file)
 
     def test_for(self):
@@ -135,7 +126,6 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4, 5, 6, 5, 6, 5, 6, 5])
-        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
         self._check_dump_file_structure(self.dump_file)
 
     def test_for_else(self):
@@ -154,7 +144,6 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4, 5, 6, 5, 6, 5, 6, 5, 8])
-        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
         self._check_dump_file_structure(self.dump_file)
 
     def test_nested_if_in_for(self):
@@ -172,7 +161,6 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5])
-        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
         self._check_dump_file_structure(self.dump_file)
 
     def test_recursive_function(self):
@@ -189,7 +177,6 @@ class TestRecord(unittest.TestCase):
 
         # Recursive calls are expanded/eval'd first, that's why 3, 3, 3.
         self._check_record_calls(record_mock, [3, 3, 3, 4, 5, 5])
-        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
         self._check_dump_file_structure(self.dump_file)
 
     def test_try_ok(self):
@@ -207,7 +194,6 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4, 5])
-        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
         self._check_dump_file_structure(self.dump_file)
 
     def test_try_except(self):
@@ -226,7 +212,6 @@ class TestRecord(unittest.TestCase):
 
         # `1 / 0` raises so the state is not recorded there. Jumps straight ahead to `y = 2`.
         self._check_record_calls(record_mock, [3, 4, 7])
-        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
         self._check_dump_file_structure(self.dump_file)
 
     def test_try_multi_except(self):
@@ -247,7 +232,6 @@ class TestRecord(unittest.TestCase):
 
         # `1 / 0` raises so the state is not recorded there. Jumps straight ahead to `y = 3`.
         self._check_record_calls(record_mock, [3, 4, 9])
-        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
         self._check_dump_file_structure(self.dump_file)
 
     def test_try_ok_else(self):
@@ -267,7 +251,6 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4, 5, 9])
-        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
         self._check_dump_file_structure(self.dump_file)
 
     def test_return_wrapping(self):
@@ -282,7 +265,6 @@ class TestRecord(unittest.TestCase):
             foo()
 
         self._check_record_calls(record_mock, [3, 4])
-        self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
         self._check_dump_file_structure(self.dump_file)
 
     def test_can_only_record_one_fn(self):
@@ -310,7 +292,7 @@ class TestRecord(unittest.TestCase):
             print "Actual calls", [record_mock.call_args_list[i][0][0] for i in range(record_mock.call_count)]
             raise
 
-    def _check_dump_file_structure(self, dump_file):
+    def _check_dump_file_structure(self, dump_file, num_executions=1):
         # Rewind the file.
         dump_file.seek(0)
         lines = dump_file.readlines()
@@ -324,7 +306,11 @@ class TestRecord(unittest.TestCase):
             data = json.loads(line)
             EXECUTION_DUMP_SCHEMA(data)
 
+        self.assertEqual(len(lines) - 1, num_executions,
+                         "Wrong number of executions dumped.")
+
     def _reset_record(self):
         """Resets `record` state as if a new program was run."""
         record.num_fns_recorded = 0
         record._record_store_hidden_123 = None
+        record.first_dump_call = True
