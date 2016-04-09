@@ -1,7 +1,7 @@
 import unittest
 import mock
 
-from utils import find_indent_level, strip_indent
+from trace.utils import find_indent_level, strip_indent
 
 
 class TestUtils(unittest.TestCase):
@@ -15,7 +15,7 @@ class TestUtils(unittest.TestCase):
         source = ''
         self.assertEqual(find_indent_level(source), 0)
 
-    @mock.patch('utils.find_indent_level')
+    @mock.patch('trace.utils.find_indent_level')
     def test_strip_indent(self, find_indent_mock):
         find_indent_mock.return_value = 4
 

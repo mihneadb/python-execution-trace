@@ -1,15 +1,15 @@
 import unittest
 import mock
 
-import record
+from trace import record
 
 
 class TestRecord(unittest.TestCase):
 
     # Patch path refers to current module because the decorator injects the
     # record fn in here.
-    record_state_fn_path = 'test_record.%s' % record.RECORD_FN_NAME
-    dump_state_fn_path = 'record.dump_recorded_state'
+    record_state_fn_path = 'tests.test_record.%s' % record.RECORD_FN_NAME
+    dump_state_fn_path = 'trace.record.dump_recorded_state'
 
     def setUp(self):
         self.dump_patcher = mock.patch(self.dump_state_fn_path)

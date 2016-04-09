@@ -8,7 +8,7 @@ import os
 import sys
 import tempfile
 
-from utils import strip_indent
+from trace.utils import strip_indent
 
 
 # Init logging.

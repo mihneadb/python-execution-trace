@@ -1,6 +1,6 @@
 import inspect
 
-from record import record
+from trace.record import record
 
 
 def foo(x, y):
