@@ -1,26 +1,20 @@
 import ast
 import copy
-from functools import wraps
 import inspect
 import json
 import logging
 import os
 import sys
 import tempfile
+from functools import wraps
 
+from trace.constants import RECORD_FN_NAME, RETVAL_NAME
 from trace.utils import strip_indent
-
 
 # Init logging.
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-
-RECORD_FN_NAME = '_record_state_fn_hidden_123'
-DUMP_FN_NAME = '_dump_state_fn_hidden_123'
-RETVAL_NAME = '_retval_hidden_123'
-RECORD_STORE_NAME = '_record_store_hidden_123'
 
 # Will be initialized in `record`.
 _record_store_hidden_123 = None
