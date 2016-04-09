@@ -24,6 +24,8 @@ class TestRecord(unittest.TestCase):
     def tearDown(self):
         if self.dump_patcher:
             self.dump_patcher.stop()
+        if self.get_dump_file_patcher:
+            self.get_dump_file_patcher.stop()
 
     def test_simple(self):
         """Simple function, no loop, no return, no conditional."""
