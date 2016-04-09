@@ -1,3 +1,4 @@
+import StringIO
 import unittest
 import mock
 
@@ -15,6 +16,10 @@ class TestRecord(unittest.TestCase):
         self.dump_patcher = mock.patch(self.dump_state_fn_path)
         self.dump_mock = self.dump_patcher.start()
         self._reset_record()
+
+        self.get_dump_file_patcher = mock.patch('trace.record._get_dump_file')
+        self.get_dump_file = self.get_dump_file_patcher.start()
+        self.get_dump_file.return_value = StringIO.StringIO(), '/tmp/mock_path'
 
     def tearDown(self):
         if self.dump_patcher:

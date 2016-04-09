@@ -75,10 +75,7 @@ def record(f):
     }
 
     first_dump_call = True
-    fd, path = tempfile.mkstemp(prefix='record_', suffix='.json')
-    # Will never be `close`d because we don't know when user stops the program.
-    # We'll live with this.
-    file = os.fdopen(fd, 'w')
+    file, path = _get_dump_file()
     logger.info("Will record execution of %s in %s", f.__name__, path)
 
     # Wrap in our own function such that we can dump the recorded state at the end.
@@ -182,6 +179,15 @@ def _fill_body_with_record(original_body, prepend=False, lineno=None):
             new_body.append(_make_record_state_call_expr(item.lineno))
 
     return new_body
+
+
+def _get_dump_file():
+    """Returns file object and its path."""
+    fd, path = tempfile.mkstemp(prefix='record_', suffix='.json')
+    # Will never be `close`d because we don't know when user stops the program.
+    # We'll live with this.
+    file = os.fdopen(fd, 'w')
+    return file, path
 
 
 def dump_recorded_state(file):
