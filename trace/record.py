@@ -26,9 +26,12 @@ first_dump_call = True
 
 def _record_state_fn_hidden_123(lineno, f_locals):
     """Stores local line data."""
+
+    # Make sure we have just primitive types.
+    f_locals = {k: repr(v) for k, v in f_locals.iteritems()}
     data = {
         'lineno': lineno,
-        'state': copy.deepcopy(f_locals),
+        'state': f_locals,
     }
     _record_store_hidden_123['data'].append(data)
 
