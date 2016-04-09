@@ -1,6 +1,7 @@
+import json
+import mock
 import StringIO
 import unittest
-import mock
 
 from trace import record
 
@@ -42,6 +43,7 @@ class TestRecord(unittest.TestCase):
 
         self._check_record_calls(record_mock, [3, 4])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+        self._check_dump_file_structure(self.dump_file)
 
     def test_conditional(self):
         """Fn with a simple conditional."""
@@ -58,6 +60,7 @@ class TestRecord(unittest.TestCase):
 
         self._check_record_calls(record_mock, [3, 4, 5, 6])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+        self._check_dump_file_structure(self.dump_file)
 
     def test_elif(self):
         """Fn with a simple conditional."""
@@ -77,6 +80,7 @@ class TestRecord(unittest.TestCase):
 
         self._check_record_calls(record_mock, [3, 4, 6, 8, 9])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+        self._check_dump_file_structure(self.dump_file)
 
     def test_conditional_else(self):
         """Fn with conditional having else."""
@@ -96,6 +100,7 @@ class TestRecord(unittest.TestCase):
         # Note: `else` does not have a lineno, using `if`'s lineno.
         self._check_record_calls(record_mock, [3, 4, 5, 8])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+        self._check_dump_file_structure(self.dump_file)
 
     def test_while(self):
         """Fn with a while."""
@@ -113,6 +118,7 @@ class TestRecord(unittest.TestCase):
 
         self._check_record_calls(record_mock, [3, 4, 6, 7, 6, 7, 6, 7, 6])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+        self._check_dump_file_structure(self.dump_file)
 
     def test_for(self):
         """Fn with a for."""
@@ -129,6 +135,7 @@ class TestRecord(unittest.TestCase):
 
         self._check_record_calls(record_mock, [3, 4, 5, 6, 5, 6, 5, 6, 5])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+        self._check_dump_file_structure(self.dump_file)
 
     def test_for_else(self):
         """Fn with a for+else."""
@@ -147,6 +154,7 @@ class TestRecord(unittest.TestCase):
 
         self._check_record_calls(record_mock, [3, 4, 5, 6, 5, 6, 5, 6, 5, 8])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+        self._check_dump_file_structure(self.dump_file)
 
     def test_nested_if_in_for(self):
         """Fn with a for containing an if."""
@@ -164,6 +172,7 @@ class TestRecord(unittest.TestCase):
 
         self._check_record_calls(record_mock, [3, 4, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+        self._check_dump_file_structure(self.dump_file)
 
     def test_recursive_function(self):
         """Fn with a recursive call."""
@@ -180,6 +189,7 @@ class TestRecord(unittest.TestCase):
         # Recursive calls are expanded/eval'd first, that's why 3, 3, 3.
         self._check_record_calls(record_mock, [3, 3, 3, 4, 5, 5])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+        self._check_dump_file_structure(self.dump_file)
 
     def test_try_ok(self):
         """Fn with a try that does not raise."""
@@ -197,6 +207,7 @@ class TestRecord(unittest.TestCase):
 
         self._check_record_calls(record_mock, [3, 4, 5])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+        self._check_dump_file_structure(self.dump_file)
 
     def test_try_except(self):
         """Fn with a try that raises."""
@@ -215,6 +226,7 @@ class TestRecord(unittest.TestCase):
         # `1 / 0` raises so the state is not recorded there. Jumps straight ahead to `y = 2`.
         self._check_record_calls(record_mock, [3, 4, 7])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+        self._check_dump_file_structure(self.dump_file)
 
     def test_try_multi_except(self):
         """Fn with a try that raises and has multiple except branches."""
@@ -235,6 +247,7 @@ class TestRecord(unittest.TestCase):
         # `1 / 0` raises so the state is not recorded there. Jumps straight ahead to `y = 3`.
         self._check_record_calls(record_mock, [3, 4, 9])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+        self._check_dump_file_structure(self.dump_file)
 
     def test_try_ok_else(self):
         """Fn with a try that does not raise and does something in `else`."""
@@ -254,6 +267,7 @@ class TestRecord(unittest.TestCase):
 
         self._check_record_calls(record_mock, [3, 4, 5, 9])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+        self._check_dump_file_structure(self.dump_file)
 
     def test_return_wrapping(self):
         """Fn with return has return value captured."""
@@ -268,6 +282,7 @@ class TestRecord(unittest.TestCase):
 
         self._check_record_calls(record_mock, [3, 4])
         self.assertEqual(self.dump_mock.call_count, 1, "Too many calls to dump fn.")
+        self._check_dump_file_structure(self.dump_file)
 
     def test_can_only_record_one_fn(self):
         """Decorator should not allow multi-function use."""
@@ -293,6 +308,20 @@ class TestRecord(unittest.TestCase):
             # Helper for debugging.
             print "Actual calls", [record_mock.call_args_list[i][0][0] for i in range(record_mock.call_count)]
             raise
+
+    def _check_dump_file_structure(self, dump_file):
+        # Rewind the file.
+        dump_file.seek(0)
+        lines = dump_file.readlines()
+
+        # First line should be source.
+        data = json.loads(lines[0])
+        self.assertIn('source', data, "First line does not have source.")
+
+        # Next lines should be execution dumps.
+        for line in lines[1:]:
+            data = json.loads(line)
+            self.assertIn('data', data, "Execution line does not have `data` key.")
 
     def _reset_record(self):
         """Resets `record` state as if a new program was run."""
