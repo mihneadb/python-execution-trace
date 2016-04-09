@@ -30,7 +30,11 @@ num_fns_recorded = 0
 
 def _record_state_fn_hidden_123(lineno, f_locals):
     """Stores local line data."""
-    _record_store_hidden_123['data'].append((lineno, copy.deepcopy(f_locals)))
+    data = {
+        'lineno': lineno,
+        'state': copy.deepcopy(f_locals),
+    }
+    _record_store_hidden_123['data'].append(data)
 
 
 # http://stackoverflow.com/a/12240419
