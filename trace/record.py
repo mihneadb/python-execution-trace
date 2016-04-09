@@ -41,7 +41,10 @@ def _record_state_fn_hidden_123(lineno, f_locals):
 # recursively apply on the new generated function.
 _blocked = False
 def record(f):
-    """Transforms `f` such that after every line record_state is called."""
+    """Transforms `f` such that after every line record_state is called.
+
+    *** HERE BE DRAGONS ***
+    """
     global num_fns_recorded
 
     # Make sure this is not a recursive decorator application.
