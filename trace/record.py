@@ -8,7 +8,7 @@ import sys
 import tempfile
 from functools import wraps
 
-from trace.constants import RECORD_FN_NAME, RETVAL_NAME
+from trace.constants import RECORD_FN_NAME, RETVAL_NAME, MANGLED_FN_NAME
 from trace.utils import strip_indent
 
 # Init logging.
@@ -74,6 +74,16 @@ def record(f):
     exec(new_f_compiled, env)
     _blocked = False
 
+    # Keep a reference to the (original) mangled function, because our decorator
+    # will end up replacing it with `wrapped`. Then, whenever `wrapped` ends up
+    # calling the original function, it would end up calling itself, leading
+    # to an infinite recursion. Thus, we keep the fn we want to call under
+    # a separate key which `wrapped` can call without a problem.
+    # We are doing this instead of simply changing the recorded fn's name because
+    # we have to support recursive calls (which would lead to NameError if we changed
+    # the fn's name).
+    env[MANGLED_FN_NAME] = env[f.__name__]
+
     # Init record store.
     global _record_store_hidden_123
     _record_store_hidden_123 = {
@@ -86,7 +96,7 @@ def record(f):
     # Wrap in our own function such that we can dump the recorded state at the end.
     @wraps(f)
     def wrapped(*args, **kwargs):
-        ret = env[f.__name__](*args, **kwargs)
+        ret = env[MANGLED_FN_NAME](*args, **kwargs)
 
         global first_dump_call
         if first_dump_call:
