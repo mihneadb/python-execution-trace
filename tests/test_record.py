@@ -1,14 +1,14 @@
 import unittest
 import mock
 
-from record import record, RECORD_FN_NAME
+import record
 
 
 class TestRecord(unittest.TestCase):
 
     # Patch path refers to current module because the decorator injects the
     # record fn in here.
-    record_state_fn_path = 'test_record.%s' % RECORD_FN_NAME
+    record_state_fn_path = 'test_record.%s' % record.RECORD_FN_NAME
     dump_state_fn_path = 'record.dump_recorded_state'
 
     def setUp(self):
@@ -22,7 +22,7 @@ class TestRecord(unittest.TestCase):
     def test_simple(self):
         """Simple function, no loop, no return, no conditional."""
 
-        @record
+        @record.record
         def foo():
             x = 5
             y = 6
@@ -36,7 +36,7 @@ class TestRecord(unittest.TestCase):
     def test_conditional(self):
         """Fn with a simple conditional."""
 
-        @record
+        @record.record
         def foo():
             x = 3
             y = 2
@@ -52,7 +52,7 @@ class TestRecord(unittest.TestCase):
     def test_elif(self):
         """Fn with a simple conditional."""
 
-        @record
+        @record.record
         def foo():
             x = 3
             if x == 1:
@@ -71,7 +71,7 @@ class TestRecord(unittest.TestCase):
     def test_conditional_else(self):
         """Fn with conditional having else."""
 
-        @record
+        @record.record
         def foo():
             x = 3
             y = 2
@@ -90,7 +90,7 @@ class TestRecord(unittest.TestCase):
     def test_while(self):
         """Fn with a while."""
 
-        @record
+        @record.record
         def foo():
             x = 3
             y = 6
@@ -107,7 +107,7 @@ class TestRecord(unittest.TestCase):
     def test_for(self):
         """Fn with a for."""
 
-        @record
+        @record.record
         def foo():
             x = 3
             s = 0
@@ -123,7 +123,7 @@ class TestRecord(unittest.TestCase):
     def test_for_else(self):
         """Fn with a for+else."""
 
-        @record
+        @record.record
         def foo():
             x = 3
             s = 0
@@ -141,7 +141,7 @@ class TestRecord(unittest.TestCase):
     def test_nested_if_in_for(self):
         """Fn with a for containing an if."""
 
-        @record
+        @record.record
         def foo():
             x = 3
             s = 0
@@ -158,7 +158,7 @@ class TestRecord(unittest.TestCase):
     def test_recursive_function(self):
         """Fn with a recursive call."""
 
-        @record
+        @record.record
         def foo(x):
             if x == 0:
                 return 1
@@ -174,7 +174,7 @@ class TestRecord(unittest.TestCase):
     def test_try_ok(self):
         """Fn with a try that does not raise."""
 
-        @record
+        @record.record
         def foo():
             x = 3
             try:
@@ -191,7 +191,7 @@ class TestRecord(unittest.TestCase):
     def test_try_except(self):
         """Fn with a try that raises."""
 
-        @record
+        @record.record
         def foo():
             x = 3
             try:
@@ -209,7 +209,7 @@ class TestRecord(unittest.TestCase):
     def test_try_multi_except(self):
         """Fn with a try that raises and has multiple except branches."""
 
-        @record
+        @record.record
         def foo():
             x = 3
             try:
@@ -229,7 +229,7 @@ class TestRecord(unittest.TestCase):
     def test_try_ok_else(self):
         """Fn with a try that does not raise and does something in `else`."""
 
-        @record
+        @record.record
         def foo():
             x = 3
             try:
@@ -248,7 +248,7 @@ class TestRecord(unittest.TestCase):
     def test_return_wrapping(self):
         """Fn with return has return value captured."""
 
-        @record
+        @record.record
         def foo():
             x = 3
             return x
