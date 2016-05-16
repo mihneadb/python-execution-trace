@@ -17,3 +17,4 @@ six==1.10.0
 traitlets==4.0.0
 voluptuous==0.8.10
 wsgiref==0.1.2
+Flask==0.10.1
