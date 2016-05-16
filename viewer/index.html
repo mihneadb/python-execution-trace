@@ -9,6 +9,7 @@
     <script src="static/js/jquery.js"></script>
     <script src="static/js/foundation.min.js"></script>
     <script src="static/js/codemirror.js"></script>
+    <script src="static/js/handlebars.min.js"></script>
     <script src="static/js/active-line.js"></script>
     <script src="static/js/python.js"></script>
 
@@ -26,10 +27,20 @@ print a
 
 
         <div class="small-6 columns state-viewer">
-            <p id="state"></p>
         </div>
     </div>
 
+
+    <script id="var-state-template" type="text/x-handlebars-template">
+        <div class="row var-state">
+            <div class="small-4 columns">
+                <span>{{name}}</span>
+            </div>
+            <div class="small-8 columns">
+                <span>{{value}}</span>
+            </div>
+        </div>
+    </script>
 
     <script src="static/js/viewer.js"></script>
 </body>
