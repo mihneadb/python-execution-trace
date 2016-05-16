@@ -4,11 +4,10 @@ import json
 import sys
 
 from flask import Flask, jsonify
-from flask.templating import render_template
+from flask.helpers import send_from_directory
 
 
-app = Flask(__name__, template_folder='.')
-# app.debug = True
+app = Flask(__name__)
 
 # `main` inits these.
 # File containing `record` output.
@@ -19,7 +18,7 @@ record_data = []
 
 @app.route("/")
 def hello():
-    return render_template('index.html')
+    return send_from_directory('.', 'index.html')
 
 
 @app.route("/source.json")
