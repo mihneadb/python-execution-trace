@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="static/css/foundation.min.css">
+    <link rel="stylesheet" href="static/css/codemirror.css">
+    <link rel="stylesheet" href="static/css/style.css">
+
+    <script src="static/js/jquery.js"></script>
+    <script src="static/js/foundation.min.js"></script>
+    <script src="static/js/codemirror.js"></script>
+    <script src="static/js/active-line.js"></script>
+    <script src="static/js/python.js"></script>
+
+    <title>Python Execution Trace</title>
+</head>
+<body>
+    <div class="row expanded">
+        <div class="small-6 columns source-viewer">
+            <textarea name="source" id="source-viewer" cols="80" rows="30">
+print "hello, world"
+a = 5 + 3
+print a
+            </textarea>
+        </div>
+
+
+        <div class="small-6 columns state-viewer">
+            <p id="state"></p>
+        </div>
+    </div>
+
+
+    <script src="static/js/viewer.js"></script>
+</body>
+</html>

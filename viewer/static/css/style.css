@@ -1,0 +1,13 @@
+.source-viewer {
+
+}
+
+.state-viewer {
+
+}
+
+.CodeMirror {
+    // Disable clicks so that no inconsistent state can be reached.
+    // `active-line` is only changed via the state viewer's handlers.
+    pointer-events: none;
+}
