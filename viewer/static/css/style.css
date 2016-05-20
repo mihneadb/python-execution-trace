@@ -3,7 +3,7 @@
 }
 
 .state-viewer {
-
+    padding-left: 0;
 }
 
 .var-state:not(:last-child) {
@@ -20,9 +20,10 @@
     // Disable clicks so that no inconsistent state can be reached.
     // `active-line` is only changed via the state viewer's handlers.
     pointer-events: none;
+    height: 50em;
 }
 
 #slider {
-    width: 18em;
-    transform: rotate(90deg) translateY(10em) translateX(10em);
+    width: 30em;
+    transform: translateX(-15em) translateY(15em) rotate(90deg);
 }
