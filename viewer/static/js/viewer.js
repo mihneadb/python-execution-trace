@@ -113,11 +113,17 @@ function initSlider(end) {
 function main() {
     document.onkeydown = keyHandler;
 
+    // Tie slider to rest of world.
     $('#slider').on('input', function (e) {
         // It's a string.
         var value = $('#slider').val() | 0;
         stateIdx = value;
         renderState();
+    });
+
+    // Disable regular slider key inputs.
+    $('#slider').on('keydown', function(e) {
+        e.preventDefault();
     });
 
     $.getJSON("source.json", function(data) {
