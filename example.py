@@ -11,3 +11,5 @@ def foo(x, y):
 
 if __name__ == '__main__':
     print foo(1, 3)
+    print foo(2, 4)
+    print foo(3, 5)

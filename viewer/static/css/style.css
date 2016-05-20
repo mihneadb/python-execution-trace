@@ -2,7 +2,7 @@
 
 }
 
-.state-viewer {
+.state-viewer-wrapper {
     padding-left: 0;
 }
 
@@ -26,4 +26,9 @@
 #slider {
     width: 30em;
     transform: translateX(-15em) translateY(15em) rotate(90deg);
+}
+
+#number {
+    width: 3em;
+    display: inline;
 }

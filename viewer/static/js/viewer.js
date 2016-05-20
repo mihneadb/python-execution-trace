@@ -17,7 +17,6 @@ function initSourceViewer() {
 
 function initStateViewer() {
     stateIdx = 0;
-    runIdx = 0;
 }
 
 function getCurrentRunStates() {
@@ -110,6 +109,11 @@ function initSlider(end) {
     setSlider(0);
 }
 
+function initNumber(end) {
+    $('#number').attr('min', 0);
+    $('#number').attr('max', end);
+}
+
 function main() {
     document.onkeydown = keyHandler;
 
@@ -126,16 +130,32 @@ function main() {
         e.preventDefault();
     });
 
+    // Tie number to rest of world.
+    $('#number').on('input', function (e) {
+        // It's a string.
+        var value = $('#number').val() | 0;
+        runIdx = value;
+        initStateViewer();
+        renderState();
+    });
+
+    // Disable regular number key inputs.
+    $('#number').on('keydown', function(e) {
+        e.preventDefault();
+    });
+
     $.getJSON("source.json", function(data) {
         $('#source-viewer').text(data.source);
 
         $.getJSON("state.json", function(data) {
             runStates = data.data;
+            runIdx = 0;
 
             initStateViewer();
             initSourceViewer();
 
             initSlider(getCurrentRunStates().length - 1);
+            initNumber(runStates.length - 1);
 
             renderState();
         });
