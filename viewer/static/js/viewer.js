@@ -135,7 +135,6 @@ function main() {
         // It's a string.
         var value = $('#number').val() | 0;
         runIdx = value;
-        initStateViewer();
         renderState();
     });
 
