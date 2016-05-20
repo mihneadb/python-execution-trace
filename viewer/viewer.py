@@ -12,7 +12,7 @@ app = Flask(__name__)
 # `main` inits these.
 # File containing `record` output.
 record_path = None
-# 0: source, 1: state
+# 0 is source, 1:N is state
 record_data = []
 
 
@@ -28,7 +28,7 @@ def source():
 
 @app.route("/state.json")
 def state():
-    return jsonify(record_data[1])
+    return jsonify({'data': record_data[1:]})
 
 
 def main():
@@ -36,7 +36,8 @@ def main():
 
     with open(record_path) as f:
         record_data.append(json.loads(f.readline()))
-        record_data.append(json.loads(f.readline()))
+        for line in f:
+            record_data.append(json.loads(line))
 
     app.run()
 

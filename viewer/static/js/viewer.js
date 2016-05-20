@@ -1,6 +1,7 @@
 var codemirror = null;
-var state = null;
+var runStates = null;
 var stateIdx = -1;
+var runIdx = -1;
 var varStateTemplate = Handlebars.compile($("#var-state-template").html());
 
 
@@ -16,24 +17,31 @@ function initSourceViewer() {
 
 function initStateViewer() {
     stateIdx = 0;
+    runIdx = 0;
+}
+
+function getCurrentRunStates() {
+    return runStates[runIdx].data;
 }
 
 function renderState() {
-    var currentState = state[stateIdx].state;
+    var currentRunStates = getCurrentRunStates();
+    var currentState = currentRunStates[stateIdx].state;
     // Off by 1 because of how Python counts lines.
-    var lineno = state[stateIdx].lineno - 1;
+    var lineno = currentRunStates[stateIdx].lineno - 1;
 
     $('.state-viewer').empty();
+
     var vars = Object.keys(currentState);
+    vars.sort();
+
     for (i = 0; i < vars.length; i++) {
         var value = formatStateValue(currentState[vars[i]])
-        console.log(vars[i]);
         var html = varStateTemplate({
                                name: vars[i],
                                value: value
                            });
         $('.state-viewer').append(html);
-        console.log(html);
     }
 
     highlightLine(lineno);
@@ -46,7 +54,7 @@ function highlightLine(lineno) {
 function nextStep() {
     var aux = stateIdx + 1;
 
-    if (aux >= state.length) {
+    if (aux >= getCurrentRunStates().length) {
         return;
     }
 
@@ -91,7 +99,7 @@ $.getJSON("source.json", function(data) {
     $('#source-viewer').text(data.source);
 
     $.getJSON("state.json", function(data) {
-        state = data.data;
+        runStates = data.data;
 
         initStateViewer();
         initSourceViewer();
