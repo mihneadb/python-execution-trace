@@ -16,6 +16,11 @@
     <title>Python Execution Trace</title>
 </head>
 <body>
+
+    <div class="row text-center">
+        <h1>Python Execution Trace</h1>
+    </div>
+
     <div class="row expanded">
         <div class="small-6 columns source-viewer">
             <textarea name="source" id="source-viewer" cols="80" rows="30">
@@ -33,7 +38,7 @@ print a
 
     <script id="var-state-template" type="text/x-handlebars-template">
         <div class="row var-state">
-            <div class="small-4 columns">
+            <div class="small-4 columns var-name">
                 <span>{{name}}</span>
             </div>
             <div class="small-8 columns">

@@ -36,9 +36,10 @@ function renderState() {
     vars.sort();
 
     for (i = 0; i < vars.length; i++) {
+        var name = formatVarName(vars[i]);
         var value = formatStateValue(currentState[vars[i]])
         var html = varStateTemplate({
-                               name: vars[i],
+                               name: name,
                                value: value
                            });
         $('.state-viewer').append(html);
@@ -90,6 +91,13 @@ function formatStateValue(value) {
         return value.slice(1, value.length - 1);
     }
     return value;
+}
+
+function formatVarName(name) {
+    if (name == "_retval_hidden_123") {
+        return "return value";
+    }
+    return name;
 }
 
 

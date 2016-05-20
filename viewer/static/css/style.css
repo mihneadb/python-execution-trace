@@ -6,6 +6,16 @@
 
 }
 
+.var-state:not(:last-child) {
+    border-bottom: thin solid #aaa;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.var-name {
+    font-weight: bold;
+}
+
 .CodeMirror {
     // Disable clicks so that no inconsistent state can be reached.
     // `active-line` is only changed via the state viewer's handlers.
