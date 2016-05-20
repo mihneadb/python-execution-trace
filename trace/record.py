@@ -84,11 +84,7 @@ def record(f):
     # the fn's name).
     env[MANGLED_FN_NAME] = env[f.__name__]
 
-    # Init record store.
-    global _record_store_hidden_123
-    _record_store_hidden_123 = {
-        'data': []
-    }
+    init_recorded_state()
 
     file, path = _get_dump_file()
     logger.info("Will record execution of %s in %s", f.__name__, path)
@@ -207,9 +203,18 @@ def _get_dump_file():
     return file, path
 
 
+def init_recorded_state():
+    global _record_store_hidden_123
+    _record_store_hidden_123 = {
+        'data': []
+    }
+
+
 def dump_recorded_state(file):
     json.dump(_record_store_hidden_123, file)
     file.write('\n')
+    # Clear state for new run.
+    init_recorded_state()
 
 
 def dump_fn_source(file, source):

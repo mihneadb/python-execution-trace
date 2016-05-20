@@ -304,6 +304,16 @@ class TestRecord(unittest.TestCase):
 
         self._check_dump_file_structure(self.dump_file, 3)
 
+        # Check that the same number of steps is recorded each time.
+        self.dump_file.seek(0)
+        self.dump_file.readline()
+        # We know we have 3 lines.
+        line1 = self.dump_file.readline()
+        line2 = self.dump_file.readline()
+        line3 = self.dump_file.readline()
+        self.assertTrue(len(line1) == len(line2) == len(line3),
+                        "State was not the same for 3 identical executions.")
+
     def _check_record_calls(self, record_mock, expected_linenos):
         try:
             self.assertEqual(record_mock.call_count, len(expected_linenos),
