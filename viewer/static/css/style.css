@@ -21,3 +21,8 @@
     // `active-line` is only changed via the state viewer's handlers.
     pointer-events: none;
 }
+
+#slider {
+    width: 18em;
+    transform: rotate(90deg) translateY(10em) translateX(10em);
+}

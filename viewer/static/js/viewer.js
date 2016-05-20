@@ -46,6 +46,7 @@ function renderState() {
     }
 
     highlightLine(lineno);
+    setSlider(stateIdx);
 }
 
 function highlightLine(lineno) {
@@ -100,18 +101,40 @@ function formatVarName(name) {
     return name;
 }
 
+function setSlider(pos) {
+    $('#slider').val(pos);
+}
 
-document.onkeydown = keyHandler;
+function initSlider(end) {
+    $('#slider').attr('max', end);
+    setSlider(0);
+}
 
-$.getJSON("source.json", function(data) {
-    $('#source-viewer').text(data.source);
+function main() {
+    document.onkeydown = keyHandler;
 
-    $.getJSON("state.json", function(data) {
-        runStates = data.data;
-
-        initStateViewer();
-        initSourceViewer();
-
+    $('#slider').on('input', function (e) {
+        // It's a string.
+        var value = $('#slider').val() | 0;
+        stateIdx = value;
         renderState();
     });
-});
+
+    $.getJSON("source.json", function(data) {
+        $('#source-viewer').text(data.source);
+
+        $.getJSON("state.json", function(data) {
+            runStates = data.data;
+
+            initStateViewer();
+            initSourceViewer();
+
+            initSlider(getCurrentRunStates().length - 1);
+
+            renderState();
+        });
+    });
+}
+
+// Go!
+main();
