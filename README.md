@@ -47,9 +47,11 @@ Go to `http://127.0.0.1:5000/`.
 Use up/down arrow keys or the vertical scroll to step through the program's execution. Change
 between function executions using the number input on the right.
 
-Here's a GIF:
+Here's a [GIF](http://i.imgur.com/HtKyNFb.gifv).
 
-![Demo](http://i.imgur.com/HtKyNFb.gifv)
+And a screenshot:
+
+![Screenshot](http://i.imgur.com/pA1Kjp1.png)
 
 ## Supported syntax
 
