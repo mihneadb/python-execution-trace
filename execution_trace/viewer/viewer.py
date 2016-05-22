@@ -11,7 +11,6 @@ from flask.helpers import send_from_directory
 app = Flask(__name__)
 viewer_root = os.path.abspath(os.path.dirname(__file__))
 
-
 # `main` inits these.
 # File containing `record` output.
 record_path = None

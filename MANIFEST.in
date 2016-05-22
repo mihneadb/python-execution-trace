@@ -1,0 +1,1 @@
+recursive-include execution_trace *.html *.js *.css
