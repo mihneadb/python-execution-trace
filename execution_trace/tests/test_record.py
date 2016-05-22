@@ -3,8 +3,8 @@ import mock
 import StringIO
 import unittest
 
-from trace import record
-from trace.constants import SOURCE_DUMP_SCHEMA, EXECUTION_DUMP_SCHEMA, RECORD_FN_NAME
+from execution_trace import record
+from execution_trace.constants import SOURCE_DUMP_SCHEMA, EXECUTION_DUMP_SCHEMA, RECORD_FN_NAME
 
 
 class TestRecord(unittest.TestCase):
@@ -12,11 +12,11 @@ class TestRecord(unittest.TestCase):
     # Patch path refers to current module because the decorator injects the
     # record fn in here.
     record_state_fn_path = '%s.%s' % (__name__, RECORD_FN_NAME)
-    dump_state_fn_path = 'trace.record.dump_recorded_state'
+    dump_state_fn_path = 'execution_trace.record.dump_recorded_state'
 
     @classmethod
     def setUpClass(cls):
-        cls.log_patcher = mock.patch('trace.record.logger')
+        cls.log_patcher = mock.patch('execution_trace.record.logger')
         cls.log_patcher.start()
 
     @classmethod
@@ -27,7 +27,7 @@ class TestRecord(unittest.TestCase):
     def setUp(self):
         self._reset_record()
 
-        self.get_dump_file_patcher = mock.patch('trace.record._get_dump_file')
+        self.get_dump_file_patcher = mock.patch('execution_trace.record._get_dump_file')
         self.get_dump_file = self.get_dump_file_patcher.start()
         self.dump_file = StringIO.StringIO()
         self.get_dump_file.return_value = self.dump_file, '/tmp/mock_path'

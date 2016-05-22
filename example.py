@@ -1,4 +1,4 @@
-from trace.record import record
+from execution_trace.record import record
 
 
 @record(3)

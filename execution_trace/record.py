@@ -8,8 +8,8 @@ import sys
 import tempfile
 from functools import wraps
 
-from trace.constants import RECORD_FN_NAME, RETVAL_NAME, MANGLED_FN_NAME
-from trace.utils import strip_indent
+from execution_trace.constants import RECORD_FN_NAME, RETVAL_NAME, MANGLED_FN_NAME
+from execution_trace.utils import strip_indent
 
 # Init logging.
 logging.basicConfig()
