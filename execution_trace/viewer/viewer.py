@@ -1,6 +1,7 @@
 # Run with `python viewer.py PATH_TO_RECORD_JSON.
 
 import json
+import os
 import sys
 
 from flask import Flask, jsonify
@@ -8,6 +9,8 @@ from flask.helpers import send_from_directory
 
 
 app = Flask(__name__)
+viewer_root = os.path.abspath(os.path.dirname(__file__))
+
 
 # `main` inits these.
 # File containing `record` output.
@@ -18,7 +21,7 @@ record_data = []
 
 @app.route("/")
 def hello():
-    return send_from_directory('.', 'index.html')
+    return send_from_directory(viewer_root, 'index.html')
 
 
 @app.route("/source.json")
