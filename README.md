@@ -49,7 +49,7 @@ between function executions using the number input on the right (see screenshot)
 
 Here's a screenshot:
 
-
+![Screenshot](http://i.imgur.com/pA1Kjp1.png)
 
 ## Supported syntax
 
