@@ -1,0 +1,5 @@
+#!/usr/bin/env python
+
+from execution_trace.viewer.viewer import main
+print "Starting UI web server, please open the URL listed below."
+main()

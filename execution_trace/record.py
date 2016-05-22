@@ -90,7 +90,9 @@ def record(num_executions=1):
         init_recorded_state()
 
         file, path = _get_dump_file()
-        logger.info("Will record execution of %s in %s", f.__name__, path)
+        logger.info("Will record execution of %s in %s. "
+                    "Use `view_trace <path_to_file>` to view it.",
+                    f.__name__, path)
 
         # Wrap in our own function such that we can dump the recorded state at the end.
         @wraps(f)
