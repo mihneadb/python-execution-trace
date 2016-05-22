@@ -42,7 +42,8 @@ def main():
         for line in f:
             record_data.append(json.loads(line))
 
-    app.run()
+    debug = __name__ == '__main__'
+    app.run(debug=debug)
 
 
 if __name__ == "__main__":
