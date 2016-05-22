@@ -22,6 +22,8 @@ _record_store_hidden_123 = None
 num_fns_recorded = 0
 # To know when to print out the source code of the function.
 first_dump_call = True
+# To know how many executions were recorded.
+num_recorded_executions = 0
 
 
 def _record_state_fn_hidden_123(lineno, f_locals):
@@ -40,69 +42,71 @@ def _record_state_fn_hidden_123(lineno, f_locals):
 # TL;DR need this because the decorator would
 # recursively apply on the new generated function.
 _blocked = False
-def record(f):
-    """Transforms `f` such that after every line record_state is called.
+def record(num_executions=1):
+    def _record(f):
+        """Transforms `f` such that after every line record_state is called.
 
-    *** HERE BE DRAGONS ***
-    """
-    global num_fns_recorded
+        *** HERE BE DRAGONS ***
+        """
+        global num_fns_recorded
 
-    # Make sure this is not a recursive decorator application.
-    global _blocked
-    if _blocked:
-        return f
+        # Make sure this is not a recursive decorator application.
+        global _blocked
+        if _blocked:
+            return f
 
-    # We only support recording one fn's executions at the moment.
-    if num_fns_recorded:
-        raise ValueError('Cannot `record` more than one function at a time.')
-    num_fns_recorded += 1
+        # We only support recording one fn's executions at the moment.
+        if num_fns_recorded:
+            raise ValueError('Cannot `record` more than one function at a time.')
+        num_fns_recorded += 1
 
-    source = inspect.getsource(f)
-    parsed = ast.parse(strip_indent(source))
-    original_body = list(parsed.body[0].body)
+        source = inspect.getsource(f)
+        parsed = ast.parse(strip_indent(source))
+        original_body = list(parsed.body[0].body)
 
-    # Update body
-    parsed.body[0].body = _fill_body_with_record(original_body)
+        # Update body
+        parsed.body[0].body = _fill_body_with_record(original_body)
 
-    # Compile and inject modified function back into its env.
-    new_f_compiled = compile(parsed, '<string>', 'exec')
-    env = sys.modules[f.__module__].__dict__
-    # We also need to inject our stuff in there.
-    env[RECORD_FN_NAME] = globals()[RECORD_FN_NAME]
+        # Compile and inject modified function back into its env.
+        new_f_compiled = compile(parsed, '<string>', 'exec')
+        env = sys.modules[f.__module__].__dict__
+        # We also need to inject our stuff in there.
+        env[RECORD_FN_NAME] = globals()[RECORD_FN_NAME]
 
-    _blocked = True
-    exec(new_f_compiled, env)
-    _blocked = False
+        _blocked = True
+        exec(new_f_compiled, env)
+        _blocked = False
 
-    # Keep a reference to the (original) mangled function, because our decorator
-    # will end up replacing it with `wrapped`. Then, whenever `wrapped` ends up
-    # calling the original function, it would end up calling itself, leading
-    # to an infinite recursion. Thus, we keep the fn we want to call under
-    # a separate key which `wrapped` can call without a problem.
-    # We are doing this instead of simply changing the recorded fn's name because
-    # we have to support recursive calls (which would lead to NameError if we changed
-    # the fn's name).
-    env[MANGLED_FN_NAME] = env[f.__name__]
+        # Keep a reference to the (original) mangled function, because our decorator
+        # will end up replacing it with `wrapped`. Then, whenever `wrapped` ends up
+        # calling the original function, it would end up calling itself, leading
+        # to an infinite recursion. Thus, we keep the fn we want to call under
+        # a separate key which `wrapped` can call without a problem.
+        # We are doing this instead of simply changing the recorded fn's name because
+        # we have to support recursive calls (which would lead to NameError if we changed
+        # the fn's name).
+        env[MANGLED_FN_NAME] = env[f.__name__]
 
-    init_recorded_state()
+        init_recorded_state()
 
-    file, path = _get_dump_file()
-    logger.info("Will record execution of %s in %s", f.__name__, path)
+        file, path = _get_dump_file()
+        logger.info("Will record execution of %s in %s", f.__name__, path)
 
-    # Wrap in our own function such that we can dump the recorded state at the end.
-    @wraps(f)
-    def wrapped(*args, **kwargs):
-        ret = env[MANGLED_FN_NAME](*args, **kwargs)
+        # Wrap in our own function such that we can dump the recorded state at the end.
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            ret = env[MANGLED_FN_NAME](*args, **kwargs)
 
-        global first_dump_call
-        if first_dump_call:
-            dump_fn_source(file, source)
-            first_dump_call = False
-        dump_recorded_state(file)
+            global first_dump_call
+            if first_dump_call:
+                dump_fn_source(file, source)
+                first_dump_call = False
+            dump_recorded_state(file, num_executions)
 
-        return ret
+            return ret
 
-    return wrapped
+        return wrapped
+    return _record
 
 
 def _make_record_state_call_expr(lineno):
@@ -210,9 +214,14 @@ def init_recorded_state():
     }
 
 
-def dump_recorded_state(file):
-    json.dump(_record_store_hidden_123, file)
-    file.write('\n')
+def dump_recorded_state(file, num_executions_limit):
+    global num_recorded_executions
+
+    if num_recorded_executions < num_executions_limit:
+        json.dump(_record_store_hidden_123, file)
+        file.write('\n')
+        num_recorded_executions += 1
+
     # Clear state for new run.
     init_recorded_state()
 

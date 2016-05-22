@@ -40,7 +40,7 @@ class TestRecord(unittest.TestCase):
     def test_simple(self):
         """Simple function, no loop, no return, no conditional."""
 
-        @record.record
+        @record.record()
         def foo():
             x = 5
             y = 6
@@ -54,7 +54,7 @@ class TestRecord(unittest.TestCase):
     def test_conditional(self):
         """Fn with a simple conditional."""
 
-        @record.record
+        @record.record()
         def foo():
             x = 3
             y = 2
@@ -70,7 +70,7 @@ class TestRecord(unittest.TestCase):
     def test_elif(self):
         """Fn with a simple conditional."""
 
-        @record.record
+        @record.record()
         def foo():
             x = 3
             if x == 1:
@@ -89,7 +89,7 @@ class TestRecord(unittest.TestCase):
     def test_conditional_else(self):
         """Fn with conditional having else."""
 
-        @record.record
+        @record.record()
         def foo():
             x = 3
             y = 2
@@ -108,7 +108,7 @@ class TestRecord(unittest.TestCase):
     def test_while(self):
         """Fn with a while."""
 
-        @record.record
+        @record.record()
         def foo():
             x = 3
             y = 6
@@ -125,7 +125,7 @@ class TestRecord(unittest.TestCase):
     def test_for(self):
         """Fn with a for."""
 
-        @record.record
+        @record.record()
         def foo():
             x = 3
             s = 0
@@ -141,7 +141,7 @@ class TestRecord(unittest.TestCase):
     def test_for_else(self):
         """Fn with a for+else."""
 
-        @record.record
+        @record.record()
         def foo():
             x = 3
             s = 0
@@ -159,7 +159,7 @@ class TestRecord(unittest.TestCase):
     def test_nested_if_in_for(self):
         """Fn with a for containing an if."""
 
-        @record.record
+        @record.record()
         def foo():
             x = 3
             s = 0
@@ -176,7 +176,7 @@ class TestRecord(unittest.TestCase):
     def test_recursive_function(self):
         """Fn with a recursive call."""
 
-        @record.record
+        @record.record()
         def foo(x):
             if x == 0:
                 return 1
@@ -192,7 +192,7 @@ class TestRecord(unittest.TestCase):
     def test_try_ok(self):
         """Fn with a try that does not raise."""
 
-        @record.record
+        @record.record()
         def foo():
             x = 3
             try:
@@ -209,7 +209,7 @@ class TestRecord(unittest.TestCase):
     def test_try_except(self):
         """Fn with a try that raises."""
 
-        @record.record
+        @record.record()
         def foo():
             x = 3
             try:
@@ -227,7 +227,7 @@ class TestRecord(unittest.TestCase):
     def test_try_multi_except(self):
         """Fn with a try that raises and has multiple except branches."""
 
-        @record.record
+        @record.record()
         def foo():
             x = 3
             try:
@@ -247,7 +247,7 @@ class TestRecord(unittest.TestCase):
     def test_try_ok_else(self):
         """Fn with a try that does not raise and does something in `else`."""
 
-        @record.record
+        @record.record()
         def foo():
             x = 3
             try:
@@ -266,7 +266,7 @@ class TestRecord(unittest.TestCase):
     def test_return_wrapping(self):
         """Fn with return has return value captured."""
 
-        @record.record
+        @record.record()
         def foo():
             x = 3
             return x
@@ -280,7 +280,7 @@ class TestRecord(unittest.TestCase):
     def test_can_only_record_one_fn(self):
         """Decorator should not allow multi-function use."""
 
-        @record.record
+        @record.record()
         def foo():
             return 3
 
@@ -288,12 +288,12 @@ class TestRecord(unittest.TestCase):
             return 4
 
         with self.assertRaises(ValueError):
-            record.record(foo2)
+            record.record()(foo2)
 
     def test_multiple_executions_are_recorded(self):
         """Multiple executions end up as multiple lines in the file."""
 
-        @record.record
+        @record.record(3)
         def foo():
             pass
 
@@ -313,6 +313,20 @@ class TestRecord(unittest.TestCase):
         line3 = self.dump_file.readline()
         self.assertTrue(len(line1) == len(line2) == len(line3),
                         "State was not the same for 3 identical executions.")
+
+    def test_limit_recorded_executions_number(self):
+        """`record` takes in `num_executions` and respects it."""
+
+        @record.record(2)
+        def foo():
+            pass
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+            foo()
+            foo()
+
+        self._check_dump_file_structure(self.dump_file, 2)
 
     def _check_record_calls(self, record_mock, expected_linenos):
         try:
@@ -348,3 +362,4 @@ class TestRecord(unittest.TestCase):
         record.num_fns_recorded = 0
         record._record_store_hidden_123 = None
         record.first_dump_call = True
+        record.num_recorded_executions = 0

@@ -1,7 +1,7 @@
 from trace.record import record
 
 
-@record
+@record(3)
 def foo(x, y):
     a = x + y
     for i in range(a):
