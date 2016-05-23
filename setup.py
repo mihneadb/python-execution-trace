@@ -3,7 +3,7 @@ from setuptools import setup
 
 
 setup(name='execution-trace',
-      version='1.0.0',
+      version='1.0.1',
       description='Record the state of Python functions as they execute.',
       url='http://github.com/mihneadb/python-execution-trace',
       author='Mihnea Dobrescu-Balaur',
