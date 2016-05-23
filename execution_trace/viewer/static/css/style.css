@@ -4,6 +4,8 @@
 
 .state-viewer-wrapper {
     padding-left: 0;
+    height: 45em;
+    overflow: scroll;
 }
 
 .var-state:not(:last-child) {
