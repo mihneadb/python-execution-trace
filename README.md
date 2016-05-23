@@ -1,6 +1,12 @@
 # python-execution-trace
 
-Trace complete context of a Python function's execution.
+Trace the local context of a Python function's execution. You can step through any function's execution,
+viewing the values of all local variables at every step.
+
+![demo](http://i.imgur.com/HtKyNFb.gif)
+
+All this by just adding a decorator to your function!
+
 
 ## How to
 
@@ -42,14 +48,12 @@ view_trace record_a0nQs5.json
 
 Go to `http://127.0.0.1:5000/`.
 
+
 ## Viewer
 
 Use up/down arrow keys or the vertical scroll to step through the program's execution. Change
 between function executions using the number input on the right.
 
-Here's a GIF:
-
-![demo](http://i.imgur.com/HtKyNFb.gif)
 
 ## Supported syntax
 
@@ -64,6 +68,7 @@ Hopefully everything:
 - recursive functions
 
 See `tests/test_record.py`.
+
 
 ## Caveats
 
