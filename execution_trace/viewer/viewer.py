@@ -33,13 +33,21 @@ def state():
     return jsonify({'data': record_data[1:]})
 
 
+def read_record_data(f):
+    record_data.append(json.loads(f.readline()))
+    for line in f:
+        record_data.append(json.loads(line))
+
+
 def main():
     record_path = sys.argv[1]
 
     with open(record_path) as f:
-        record_data.append(json.loads(f.readline()))
-        for line in f:
-            record_data.append(json.loads(line))
+        try:
+            read_record_data(f)
+        except ValueError:
+            print("Record file empty. Was the recorded function called?")
+            sys.exit(1)
 
     debug = __name__ == '__main__'
     app.run(debug=debug)
