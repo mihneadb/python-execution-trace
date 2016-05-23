@@ -25,6 +25,12 @@ function getCurrentRunStates() {
 
 function renderState() {
     var currentRunStates = getCurrentRunStates();
+
+    // stateIdx might be out of bounds (changing between executions).
+    if (stateIdx >= currentRunStates.length) {
+        stateIdx = currentRunStates.length - 1;
+    }
+
     var currentState = currentRunStates[stateIdx].state;
     // Off by 1 because of how Python counts lines.
     var lineno = currentRunStates[stateIdx].lineno - 1;
@@ -135,6 +141,8 @@ function main() {
         // It's a string.
         var value = $('#number').val() | 0;
         runIdx = value;
+        // This execution might have different number of steps.
+        initSlider(getCurrentRunStates().length - 1);
         renderState();
     });
 
