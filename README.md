@@ -72,4 +72,8 @@ See `tests/test_record.py`.
 
 ## Caveats
 
-Can also trace a function at a time. No work was done to support multithreading at this point.
+Can also trace a function at a time.
+
+No work was done to support multithreading at this point.
+
+Python2 only. Probably not hard to make it work on Python3, worth a look.
