@@ -37,13 +37,13 @@ You can also record multiple executions of the function, by passing in a paramet
 Run your code as you normally would. You'll get a message such as:
 
 ```
-INFO:execution_trace.record:Will record execution of foo in /tmp/record_a0nQs5.json. Use `view_trace <path_to_file>` to view it.
+INFO:execution_trace.record:Will record execution of foo in /tmp/record_a0nQs5.json . Use `view_trace /tmp/record_a0nQs5.json` to view it.
 ```
 
 View the trace using the supplied viewer:
 
 ```bash
-view_trace record_a0nQs5.json
+view_trace /tmp/record_a0nQs5.json
 ```
 
 Go to `http://127.0.0.1:5000/`.
