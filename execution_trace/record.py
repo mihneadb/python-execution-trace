@@ -73,7 +73,7 @@ def record(num_executions=1):
         env[RECORD_FN_NAME] = globals()[RECORD_FN_NAME]
 
         _blocked = True
-        exec(new_f_compiled, env)
+        exec new_f_compiled in env
         _blocked = False
 
         # Keep a reference to the (original) mangled function, because our decorator
