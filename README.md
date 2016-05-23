@@ -44,12 +44,12 @@ Go to `http://127.0.0.1:5000/`.
 
 ## Viewer
 
-Use up/down arrow keys or the vertical scroll (see screenshot) to step through the program's execution. Change
-between function executions using the number input on the right (see screenshot).
+Use up/down arrow keys or the vertical scroll to step through the program's execution. Change
+between function executions using the number input on the right.
 
-Here's a screenshot:
+Here's a GIF:
 
-
+![demo](http://i.imgur.com/HtKyNFb.gif)
 
 ## Supported syntax
 
