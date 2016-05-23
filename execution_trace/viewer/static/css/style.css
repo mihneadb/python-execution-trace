@@ -17,8 +17,8 @@
 }
 
 .CodeMirror {
-    // Disable clicks so that no inconsistent state can be reached.
-    // `active-line` is only changed via the state viewer's handlers.
+    /* Disable clicks so that no inconsistent state can be reached.
+       `active-line` is only changed via the state viewer's handlers. */
     pointer-events: none;
     height: 50em;
 }
@@ -32,3 +32,4 @@
     width: 3em;
     display: inline;
 }
+
