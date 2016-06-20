@@ -96,6 +96,9 @@ def record(num_executions=1):
         # Wrap in our own function such that we can dump the recorded state at the end.
         @wraps(f)
         def wrapped(*args, **kwargs):
+            # Clear state for new run.
+            init_recorded_state()
+
             ret = env[MANGLED_FN_NAME](*args, **kwargs)
 
             global first_dump_call
@@ -222,9 +225,6 @@ def dump_recorded_state(file, num_executions_limit):
         json.dump(_record_store_hidden_123, file)
         file.write('\n')
         num_recorded_executions += 1
-
-    # Clear state for new run.
-    init_recorded_state()
 
 
 def dump_fn_source(file, source):
