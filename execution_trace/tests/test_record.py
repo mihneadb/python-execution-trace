@@ -328,6 +328,23 @@ class TestRecord(unittest.TestCase):
 
         self._check_dump_file_structure(self.dump_file, 2)
 
+    def test_call_original_function_after_num_executions(self):
+        """Original function is called when we are done recording."""
+
+        @record.record(2)
+        def foo():
+            return 3
+
+        with mock.patch(self.record_state_fn_path) as record_mock:
+            foo()
+            foo()
+            r = foo()
+
+        self._check_record_calls(record_mock, [3, 3])
+        self._check_dump_file_structure(self.dump_file, 2)
+        self.assertEqual(r, 3,
+                         "Third call did not return what it was supposed to.")
+
     def _check_record_calls(self, record_mock, expected_linenos):
         try:
             self.assertEqual(record_mock.call_count, len(expected_linenos),

@@ -70,6 +70,13 @@ Hopefully everything:
 See `tests/test_record.py`.
 
 
+## Performance
+
+No need to worry about performance - the instrumentation overhead is present
+only for the number of executions that you want recorded. Once the data was
+gathered, only the original version of your code is run.
+
+
 ## Caveats
 
 Can also trace a function at a time.
