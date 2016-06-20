@@ -3,7 +3,7 @@ from setuptools import setup
 
 
 setup(name='execution-trace',
-      version='1.0.3',
+      version='1.0.4',
       description="Trace the local context of a Python function's execution with just a decorator",
       url='http://github.com/mihneadb/python-execution-trace',
       author='Mihnea Dobrescu-Balaur',
