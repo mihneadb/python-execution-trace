@@ -1,4 +1,4 @@
-# python-execution-trace
+# python-execution-trace [![Build Status](https://travis-ci.org/mihneadb/python-execution-trace.svg?branch=add-travis)](https://travis-ci.org/mihneadb/python-execution-trace)
 
 Trace the local context of a Python function's execution. You can step through any function's execution,
 viewing the values of all local variables at every step.
