@@ -79,7 +79,7 @@ gathered, only the original version of your code is run.
 
 ## Caveats
 
-Can also trace a function at a time.
+Can only trace a function at a time.
 
 No work was done to support multithreading at this point.
 
