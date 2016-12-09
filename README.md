@@ -51,7 +51,7 @@ Go to `http://127.0.0.1:5000/`.
 
 ## Viewer
 
-Use up/down arrow keys or the vertical scroll to step through the program's execution. Change
+Use the up/down arrow keys or the vertical scroll to step through the program's execution. Change
 between function executions using the number input on the right.
 
 
