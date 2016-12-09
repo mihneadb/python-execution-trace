@@ -3,7 +3,7 @@
 Trace the local context of a Python function's execution. You can step through any function's execution,
 viewing the values of all local variables at every step.
 
-![demo](http://i.imgur.com/HtKyNFb.gif)
+![demo](http://i.imgur.com/zdmeBt4.gif)
 
 All this by just adding a decorator to your function!
 

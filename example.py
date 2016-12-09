@@ -1,15 +1,18 @@
+from collections import defaultdict
+import re
+
 from execution_trace.record import record
 
 
-@record(3)
-def foo(x, y):
-    a = x + y
-    for i in range(a):
-        x = x + 1
-    return x
+@record(2)
+def wordcount(text):
+    words = defaultdict(int)
+    for word in re.findall('\w+', text):
+        words[word] += 1
+    return words
 
 
 if __name__ == '__main__':
-    print foo(1, 3)
-    print foo(2, 4)
-    print foo(3, 5)
+    print wordcount('Hello, world!')
+    print wordcount('echo echo echo echo')
+
