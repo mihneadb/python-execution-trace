@@ -142,6 +142,24 @@ class TestRecord(unittest.TestCase):
         self.assertEqual(r, 3,
                          "Third call did not return what it was supposed to.")
 
+    def test_exception_flow(self):
+        """Trace is still recorded when exception occurs."""
+
+        @record.record(10)  # 1
+        def f():  # 2
+            """Simple function that throws an exception."""  # 3
+            x = 5  # 4
+            raise ValueError('test')  # 5
+
+        # Run it.
+        with self.assertRaises(ValueError):
+            f()
+
+        expected_trace = [{u'data': [{u'lineno': 3, u'state': {}},
+                                     {u'lineno': 4, u'state': {u'x': u'5'}}]}]
+        self._check_dump_file(self.dump_file, expected_trace==expected_trace)
+
+
     def _check_dump_file(self, dump_file, num_executions=1, expected_trace=None):
         # Rewind the file.
         dump_file.seek(0)

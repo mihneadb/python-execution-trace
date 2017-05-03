@@ -111,13 +111,22 @@ def record(num_executions=1):
 
                 # New stack frame -> new state.
                 push_recorded_state()
-                ret = env[MANGLED_FN_NAME](*args, **kwargs)
 
-                dump_recorded_state(file)
-                # Done recording on this frame.
-                pop_recorded_state()
+                # Call the recorded function. This might throw.
+                try:
+                    ret = env[MANGLED_FN_NAME](*args, **kwargs)
 
-                num_recorded_executions += 1
+                except:
+                    # Re-raise, let the user handle this.
+                    raise
+
+                finally:
+                    # But still log what we captured.
+                    dump_recorded_state(file)
+
+                    # Done recording on this frame.
+                    pop_recorded_state()
+                    num_recorded_executions += 1
 
             # If not, just call the original function.
             else:
