@@ -67,7 +67,7 @@ Hopefully everything:
 - return
 - recursive functions
 
-See `tests/test_record.py`.
+See `execution_trace/tests/functions/`.
 
 
 ## Performance
