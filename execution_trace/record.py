@@ -6,6 +6,7 @@ import os
 import sys
 import tempfile
 from functools import wraps
+from collections import deque
 
 from execution_trace.constants import RECORD_FN_NAME, RETVAL_NAME, MANGLED_FN_NAME
 from execution_trace.utils import strip_indent
@@ -15,7 +16,7 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# Will be initialized in `record`.
+# Will be initialized in `record`. See `init_recorded_state`.
 _record_store_hidden_123 = None
 # To guard against decorating more than one function.
 num_fns_recorded = 0
@@ -34,7 +35,9 @@ def _record_state_fn_hidden_123(lineno, f_locals):
         'lineno': lineno,
         'state': f_locals,
     }
-    _record_store_hidden_123['data'].append(data)
+
+    # This is a stack so always append in the top frame.
+    _record_store_hidden_123[-1]['data'].append(data)
 
 
 # http://stackoverflow.com/a/12240419
@@ -102,16 +105,18 @@ def record(num_executions=1):
                 dump_fn_source(file, source)
                 first_dump_call = False
 
-
             global num_recorded_executions
             # Are we still recording?
             if num_recorded_executions < num_executions:
-                # Clear state for new run.
-                init_recorded_state()
 
+                # New stack frame -> new state.
+                push_recorded_state()
                 ret = env[MANGLED_FN_NAME](*args, **kwargs)
 
                 dump_recorded_state(file)
+                # Done recording on this frame.
+                pop_recorded_state()
+
                 num_recorded_executions += 1
 
             # If not, just call the original function.
@@ -224,13 +229,23 @@ def _get_dump_file():
 
 def init_recorded_state():
     global _record_store_hidden_123
-    _record_store_hidden_123 = {
-        'data': []
-    }
+    # Using a stack for the frames' states to support recursive fns.
+    _record_store_hidden_123 = deque()
+
+
+def push_recorded_state():
+    global _record_store_hidden_123
+    _record_store_hidden_123.append({'data': []})
+
+
+def pop_recorded_state():
+    global _record_store_hidden_123
+    _record_store_hidden_123.pop()
 
 
 def dump_recorded_state(file):
-    json.dump(_record_store_hidden_123, file)
+    # This is a stack so always dump top call.
+    json.dump(_record_store_hidden_123[-1], file)
     file.write('\n')
 
 
