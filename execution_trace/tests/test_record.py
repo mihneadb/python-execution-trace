@@ -20,6 +20,11 @@ SYNTAX_TESTS = [
 ]
 
 
+def custom_name_func(testcase_func, param_num, param):
+    """Generates friendly names such as `test_syntax_while`."""
+    return "%s_%s" % (testcase_func.__name__, param.args[0])
+
+
 class TestRecord(unittest.TestCase):
 
     # Patch path refers to current module because the decorator injects the
@@ -50,7 +55,7 @@ class TestRecord(unittest.TestCase):
             self.get_dump_file_patcher.stop()
         self.dump_file = None
 
-    @parameterized.expand(SYNTAX_TESTS)
+    @parameterized.expand(SYNTAX_TESTS, testcase_func_name=custom_name_func)
     def test_syntax(self, f_module_name):
         """Go through all supported constructs and test them."""
 
