@@ -3,7 +3,7 @@ from setuptools import setup
 
 
 setup(name='execution-trace',
-      version='1.0.4',
+      version='1.1.0',
       description="Trace the local context of a Python function's execution with just a decorator",
       url='http://github.com/mihneadb/python-execution-trace',
       author='Mihnea Dobrescu-Balaur',
@@ -19,7 +19,8 @@ setup(name='execution-trace',
       test_suite='nose.collector',
       tests_require=[
             'nose==1.3.7',
-            'mock==1.3.0'
+            'mock==1.3.0',
+            'parameterized==0.6.1',
       ],
       scripts=[
             'bin/view_trace',
