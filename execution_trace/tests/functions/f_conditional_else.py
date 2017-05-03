@@ -12,6 +12,10 @@ def f():  # 2
         y = 6  # 9
 
 
-expected_linenos = [3, 4, 5, 6, 9]
 args = ()
-expected_num_executions = 1
+expected_trace = [{u'data': [{u'lineno': 3, u'state': {}},
+                             {u'lineno': 4, u'state': {u'x': u'3'}},
+                             {u'lineno': 5, u'state': {u'x': u'3', u'y': u'2'}},
+                             {u'lineno': 6, u'state': {u'x': u'3', u'y': u'2'}},
+                             {u'lineno': 9, u'state': {u'x': u'3', u'y': u'6'}}]}]
+

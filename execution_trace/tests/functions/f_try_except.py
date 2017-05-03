@@ -11,7 +11,10 @@ def f():  # 2
         y = 2  # 8
 
 
-# `1 / 0` raises so the state is not recorded there. Jumps straight ahead to `y = 2`.
-expected_linenos = [3, 4, 5, 8]
 args = ()
-expected_num_executions = 1
+# `1 / 0` raises so the state is not recorded there. Jumps straight ahead to `y = 2`.
+expected_trace = [{u'data': [{u'lineno': 3, u'state': {}},
+                             {u'lineno': 4, u'state': {u'x': u'3'}},
+                             {u'lineno': 5, u'state': {u'x': u'3'}},
+                             {u'lineno': 8, u'state': {u'x': u'3', u'y': u'2'}}]}]
+

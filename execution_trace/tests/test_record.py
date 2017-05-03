@@ -10,6 +10,8 @@ from execution_trace import record
 from execution_trace.constants import SOURCE_DUMP_SCHEMA, EXECUTION_DUMP_SCHEMA, RECORD_FN_NAME
 
 
+# Covers all supported syntax. See `execution_trace.tests.functions`
+# package for context.
 SYNTAX_TESTS = [
     'simple', 'conditional', 'elif',
     'conditional_else', 'while', 'for',
@@ -26,11 +28,6 @@ def custom_name_func(testcase_func, param_num, param):
 
 
 class TestRecord(unittest.TestCase):
-
-    # Patch path refers to current module because the decorator injects the
-    # record fn in here.
-    record_state_fn_path = '%s.%s' % (__name__, RECORD_FN_NAME)
-    dump_state_fn_path = 'execution_trace.record.dump_recorded_state'
 
     @classmethod
     def setUpClass(cls):
@@ -63,17 +60,15 @@ class TestRecord(unittest.TestCase):
         f_module = importlib.import_module('execution_trace.tests.functions.%s' % f_module_name)
 
         f = f_module.f
-        expected_linenos = f_module.expected_linenos
         args = f_module.args
-        expected_num_executions = f_module.expected_num_executions
+        expected_trace = f_module.expected_trace
+        expected_num_executions = len(expected_trace)
 
-        record_fn_path = 'execution_trace.tests.functions.%s.%s' % (f_module_name, RECORD_FN_NAME)
+        # Run it.
+        f(*args)
 
-        with mock.patch(record_fn_path) as record_mock:
-            f(*args)
-
-        self._check_record_calls(record_mock, expected_linenos)
-        self._check_dump_file_structure(self.dump_file, expected_num_executions)
+        self._check_dump_file(self.dump_file, expected_num_executions,
+                              expected_trace=expected_trace)
 
     def test_can_only_record_one_fn(self):
         """Decorator should not allow multi-function use."""
@@ -95,12 +90,12 @@ class TestRecord(unittest.TestCase):
         def foo():
             pass
 
-        with mock.patch(self.record_state_fn_path) as record_mock:
-            foo()
-            foo()
-            foo()
+        # Run it.
+        foo()
+        foo()
+        foo()
 
-        self._check_dump_file_structure(self.dump_file, 3)
+        self._check_dump_file(self.dump_file, 3)
 
         # Check that the same number of steps is recorded each time.
         self.dump_file.seek(0)
@@ -119,12 +114,12 @@ class TestRecord(unittest.TestCase):
         def foo():
             pass
 
-        with mock.patch(self.record_state_fn_path) as record_mock:
-            foo()
-            foo()
-            foo()
+        # Run it.
+        foo()
+        foo()
+        foo()
 
-        self._check_dump_file_structure(self.dump_file, 2)
+        self._check_dump_file(self.dump_file, 2)
 
     def test_call_original_function_after_num_executions(self):
         """Original function is called when we are done recording."""
@@ -133,29 +128,21 @@ class TestRecord(unittest.TestCase):
         def foo():
             return 3
 
-        with mock.patch(self.record_state_fn_path) as record_mock:
+        # Patch path refers to current module because the decorator injects the
+        # record fn in here.
+        record_state_fn_path = '%s.%s' % (__name__, RECORD_FN_NAME)
+        with mock.patch(record_state_fn_path) as record_mock:
             foo()
             foo()
             r = foo()
 
-        self._check_record_calls(record_mock, [3, 3])
-        self._check_dump_file_structure(self.dump_file, 2)
+        self.assertEqual(record_mock.call_count, 2,
+                         "Wrong number of calls to record.")
+        self._check_dump_file(self.dump_file, 2)
         self.assertEqual(r, 3,
                          "Third call did not return what it was supposed to.")
 
-    def _check_record_calls(self, record_mock, expected_linenos):
-        try:
-            self.assertEqual(record_mock.call_count, len(expected_linenos),
-                             "Wrong number of calls to record.")
-            for i, lineno in enumerate(expected_linenos):
-                self.assertEqual(record_mock.call_args_list[i][0][0], lineno,
-                                 "Record was called with the wrong lineno.")
-        except:
-            # Helper for debugging.
-            print "Actual calls", [record_mock.call_args_list[i][0][0] for i in range(record_mock.call_count)]
-            raise
-
-    def _check_dump_file_structure(self, dump_file, num_executions=1):
+    def _check_dump_file(self, dump_file, num_executions=1, expected_trace=None):
         # Rewind the file.
         dump_file.seek(0)
         lines = dump_file.readlines()
@@ -165,9 +152,15 @@ class TestRecord(unittest.TestCase):
         SOURCE_DUMP_SCHEMA(data)
 
         # Next lines should be execution dumps.
+        executions = []
         for line in lines[1:]:
             data = json.loads(line)
             EXECUTION_DUMP_SCHEMA(data)
+            executions.append(data)
+
+        if expected_trace is not None:
+            self.assertEqual(executions, expected_trace,
+                             "Wrong trace recorded.")
 
         self.assertEqual(len(lines) - 1, num_executions,
                          "Wrong number of executions dumped.")
