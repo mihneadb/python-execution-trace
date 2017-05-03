@@ -1,4 +1,3 @@
-from collections import namedtuple
 import importlib
 import json
 import mock
