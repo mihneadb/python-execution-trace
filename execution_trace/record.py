@@ -1,4 +1,10 @@
+from future.utils import viewitems
 import ast
+# Python 2 and 3
+try:
+    from ast import TryExcept as Try
+except ImportError:
+    from ast import Try
 import inspect
 import json
 import logging
@@ -30,7 +36,8 @@ def _record_state_fn_hidden_123(lineno, f_locals):
     """Stores local line data."""
 
     # Make sure we have just primitive types.
-    f_locals = {k: repr(v) for k, v in f_locals.iteritems()}
+    f_locals = {k: repr(v) for k, v in viewitems(f_locals)}  # Python 2 and 3
+
     data = {
         'lineno': lineno,
         'state': f_locals,
@@ -44,6 +51,8 @@ def _record_state_fn_hidden_123(lineno, f_locals):
 # TL;DR need this because the decorator would
 # recursively apply on the new generated function.
 _blocked = False
+
+
 def record(num_executions=1):
     def _record(f):
         """Transforms `f` such that after every line record_state is called.
@@ -76,7 +85,9 @@ def record(num_executions=1):
         env[RECORD_FN_NAME] = globals()[RECORD_FN_NAME]
 
         _blocked = True
-        exec new_f_compiled in env
+        # https://stackoverflow.com/questions/15086040/behavior-of-exec-function-in-python-2-and-python-3
+        exec(new_f_compiled, env)  # Python 2 and 3
+
         _blocked = False
 
         # Keep a reference to the (original) mangled function, because our decorator
@@ -135,6 +146,7 @@ def record(num_executions=1):
             return ret
 
         return wrapped
+
     return _record
 
 
@@ -203,7 +215,7 @@ def _fill_body_with_record(original_body, prepend=False, lineno=None):
             has_nested = True
 
             # Don't want to prepend call for try/except, but we want for the others.
-            if isinstance(item, ast.TryExcept):
+            if isinstance(item, Try):
                 prepend = False
             else:
                 prepend = True

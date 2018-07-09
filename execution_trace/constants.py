@@ -1,4 +1,5 @@
 from voluptuous import Schema, Required
+from builtins import str
 
 RECORD_FN_NAME = '_record_state_fn_hidden_123'
 RETVAL_NAME = '_retval_hidden_123'
@@ -14,5 +15,5 @@ EXECUTION_DUMP_SCHEMA = Schema({
 })
 
 SOURCE_DUMP_SCHEMA = Schema({
-    Required('source'): basestring
+    Required('source'): str     # Python 2.7 & 3.x
 })

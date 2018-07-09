@@ -1,14 +1,19 @@
 import importlib
 import json
 import mock
-import StringIO
+from sys import version_info
 import unittest
-
+#
 from parameterized import parameterized
-
+#
 from execution_trace import record
 from execution_trace.constants import SOURCE_DUMP_SCHEMA, EXECUTION_DUMP_SCHEMA, RECORD_FN_NAME
 
+if version_info[0] < 3:
+    from StringIO import StringIO   # Python 2.7
+else:
+    # https://stackoverflow.com/questions/11914472/stringio-in-python3
+    from io import StringIO     # Python 3.x
 
 # Covers all supported syntax. See `execution_trace.tests.functions`
 # package for context.
@@ -44,7 +49,7 @@ class TestRecord(unittest.TestCase):
 
         self.get_dump_file_patcher = mock.patch('execution_trace.record._get_dump_file')
         self.get_dump_file = self.get_dump_file_patcher.start()
-        self.dump_file = StringIO.StringIO()
+        self.dump_file = StringIO()
         self.get_dump_file.return_value = self.dump_file, '/tmp/mock_path'
 
     def tearDown(self):
@@ -157,8 +162,7 @@ class TestRecord(unittest.TestCase):
 
         expected_trace = [{u'data': [{u'lineno': 3, u'state': {}},
                                      {u'lineno': 4, u'state': {u'x': u'5'}}]}]
-        self._check_dump_file(self.dump_file, expected_trace==expected_trace)
-
+        self._check_dump_file(self.dump_file, expected_trace == expected_trace)
 
     def _check_dump_file(self, dump_file, num_executions=1, expected_trace=None):
         # Rewind the file.
