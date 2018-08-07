@@ -1,3 +1,4 @@
+from __future__ import print_function
 from collections import defaultdict
 import re
 
@@ -13,6 +14,5 @@ def wordcount(text):
 
 
 if __name__ == '__main__':
-    print wordcount('Hello, world!')
-    print wordcount('echo echo echo echo')
-
+    print(wordcount('Hello, world!'))
+    print(wordcount('echo echo echo echo'))
